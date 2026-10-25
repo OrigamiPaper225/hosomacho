@@ -1,0 +1,745 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>細マッチョ Field Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#0f1222">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="細マッチョ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: one phone-width column; sticky header holds Gym/Food switch + a shared Mon–Sun strip, so one tap answers "what today". */
+:root {
+  --bg: #eceef4;
+  --surface: #ffffff;
+  --surface-2: #f4f5f9;
+  --ink: #161a2e;
+  --muted: #565c74;
+  --line: #d6d9e4;
+  --accent: #b86e00;      /* egg yolk, darkened for light-bg contrast */
+  --accent-soft: #fbe9c8;
+  --on-accent: #1b1300;
+  --done: #2f7a52;
+  --done-soft: #d8efe2;
+  --warn: #a3401f;
+  --warn-soft: #fbe3d9;
+  --f-display: "Dela Gothic One", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --f-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, -apple-system, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f1222; --surface: #181c30; --surface-2: #1f2440; --ink: #eceef6; --muted: #9aa0b8;
+    --line: #2b3050; --accent: #f5b335; --accent-soft: #3a2f17; --on-accent: #1b1300;
+    --done: #6cc495; --done-soft: #183427; --warn: #f08c6a; --warn-soft: #3a1f18;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1222; --surface: #181c30; --surface-2: #1f2440; --ink: #eceef6; --muted: #9aa0b8;
+  --line: #2b3050; --accent: #f5b335; --accent-soft: #3a2f17; --on-accent: #1b1300;
+  --done: #6cc495; --done-soft: #183427; --warn: #f08c6a; --warn-soft: #3a1f18;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+  -webkit-tap-highlight-color: transparent;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.2; }
+h2 { font-family: var(--f-display); font-weight: 400; font-size: 1.45rem; }
+h3 { font-size: 1.08rem; font-weight: 700; }
+p { margin: 0; }
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: .88rem; }
+.label { font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+
+/* Header */
+header {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); padding-block: 12px 10px; display: grid; gap: 10px;
+  border-bottom: 1px solid var(--line);
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  padding-inline: max(16px, env(safe-area-inset-left, 0px));
+}
+.head-in { max-width: 760px; margin: 0 auto; width: 100%; display: grid; gap: 10px; }
+.brand { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.brand h1 { font-family: var(--f-display); font-weight: 400; font-size: 1.5rem; letter-spacing: .02em; }
+.brand span { font-size: .8rem; color: var(--muted); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+.seg button {
+  font: inherit; font-weight: 700; border: 0; border-radius: 999px; padding: 10px 0; min-height: 44px;
+  background: transparent; color: var(--muted); cursor: pointer;
+}
+.seg button[aria-selected="true"] { background: var(--accent); color: var(--on-accent); }
+.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.days button {
+  font: inherit; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: 10px; padding: 6px 0 5px; min-height: 52px; cursor: pointer;
+  display: grid; justify-items: center; gap: 1px; position: relative;
+}
+.days b { font-size: .86rem; }
+.days small { font-size: .62rem; color: var(--muted); line-height: 1.1; }
+.days button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.days button.today::after { content: ""; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+/* Shared blocks */
+.panel[hidden] { display: none; }
+.panel { display: grid; gap: 20px; }
+.dayhead { display: grid; gap: 6px; padding-top: 4px; }
+.dayhead .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; padding: 3px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); color: var(--muted); }
+.chip.accent { background: var(--accent-soft); color: var(--ink); border-color: transparent; }
+.chip.done { background: var(--done-soft); color: var(--done); border-color: transparent; font-weight: 700; }
+.bar { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--line); }
+.bar i { display: block; height: 100%; background: var(--done); width: 0; transition: width .3s; }
+.note { background: var(--warn-soft); border-radius: var(--r); padding: 12px 14px; font-size: .9rem; display: grid; gap: 4px; }
+.note strong { color: var(--warn); }
+.list { display: grid; gap: 14px; }
+details.box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.box > summary { cursor: pointer; padding: 14px 16px; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 10px; min-height: 48px; align-items: center; }
+details.box > summary::-webkit-details-marker { display: none; }
+details.box > summary::after { content: "+"; font-family: var(--f-mono); color: var(--accent); font-size: 1.2rem; }
+details.box[open] > summary::after { content: "−"; }
+details.box > .in { padding: 0 16px 16px; display: grid; gap: 10px; }
+ul.clean { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+
+/* Exercise card */
+.ex { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: grid; }
+.ex.complete { border-color: var(--done); }
+.media { position: relative; aspect-ratio: 850 / 567; max-width: 100%; background: #000; display: block; width: 100%; }
+.media.playing { aspect-ratio: 16 / 9; }
+.media.playing.short { aspect-ratio: 9 / 16; max-height: 72vh; margin-inline: auto; }
+.media iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.media .play { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; padding: 0; background: transparent; cursor: pointer; display: block; }
+.media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.media .tag {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: rgba(10,12,24,.78); color: #fff; font: 700 .95rem var(--f-body);
+  padding: 12px 20px; border-radius: 99px; display: flex; gap: 10px; align-items: center; white-space: nowrap;
+}
+.media .tag::before { content: ""; border-style: solid; border-width: 8px 0 8px 13px; border-color: transparent transparent transparent var(--accent); }
+.media .play:hover .tag, .media .play:focus-visible .tag { background: rgba(10,12,24,.92); }
+.media .fallback, .photo .fallback { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 16px; color: var(--muted); font-size: .9rem; }
+.ex .body { padding: 14px 16px 16px; display: grid; gap: 10px; }
+.ex .top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.ex .num { font-family: var(--f-mono); color: var(--muted); font-size: .8rem; }
+.sr { font-family: var(--f-mono); font-weight: 700; font-size: 1.05rem; white-space: nowrap; color: var(--accent); }
+.cue { font-size: .95rem; }
+.sh { font-size: .85rem; color: var(--warn); }
+.sets { display: flex; flex-wrap: wrap; gap: 8px; }
+.sets button {
+  font: inherit; font-weight: 700; font-size: .9rem; min-width: 76px; min-height: 46px; padding: 0 12px;
+  border-radius: 12px; border: 2px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer;
+}
+.sets button[aria-pressed="true"] { background: var(--done); border-color: var(--done); color: var(--surface); }
+.links { display: flex; flex-wrap: wrap; gap: 14px; font-size: .9rem; }
+.links a { font-weight: 700; text-decoration: none; padding-block: 6px; }
+
+/* Meal card */
+.meal { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: grid; }
+.meal.eaten { border-color: var(--done); }
+.photo { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: var(--surface-2); }
+.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.photo .when { position: absolute; left: 10px; top: 10px; background: var(--accent); color: var(--on-accent); font-weight: 700; font-size: .78rem; padding: 3px 10px; border-radius: 99px; }
+.meal .body { padding: 14px 16px 16px; display: grid; gap: 10px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.eat { font: inherit; font-weight: 700; min-height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; }
+.eat[aria-pressed="true"] { background: var(--done); border-color: var(--done); color: var(--surface); }
+.meal details > summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 40px; display: flex; align-items: center; }
+.meal details .in { display: grid; gap: 10px; padding-top: 4px; }
+ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+
+/* Grocery */
+.groc { display: grid; gap: 14px; }
+.groc fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 2px; }
+.groc legend { padding: 0 0 6px; }
+.groc label { display: flex; gap: 12px; align-items: center; min-height: 44px; padding: 4px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.groc input { width: 22px; height: 22px; accent-color: var(--done); flex: none; }
+.groc input:checked + span { text-decoration: line-through; color: var(--muted); }
+.btn { font: inherit; font-weight: 700; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; justify-self: start; }
+.btn.armed { background: var(--warn); border-color: var(--warn); color: var(--surface); }
+
+/* Evidence */
+.ev { display: grid; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.ev:last-child { border-bottom: 0; }
+.ev p { font-size: .92rem; }
+.ev .k { font-weight: 700; color: var(--muted); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+
+footer { font-size: .78rem; color: var(--muted); display: grid; gap: 6px; }
+</style>
+
+<header>
+  <div class="head-in">
+    <div class="brand"><h1>細マッチョ</h1><span id="weekLabel"></span></div>
+    <div class="seg" role="tablist" aria-label="Section">
+      <button role="tab" id="tab-gym" aria-controls="gym" aria-selected="true" data-tab="gym">Gym</button>
+      <button role="tab" id="tab-food" aria-controls="food" aria-selected="false" data-tab="food">Food</button>
+    </div>
+    <div class="days" id="days" aria-label="Day of week"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="panel" id="gym" role="tabpanel" aria-labelledby="tab-gym">
+    <div class="dayhead" id="gymHead"></div>
+    <div class="list" id="gymList"></div>
+
+    <div class="note">
+      <strong>Shoulder history: stop anything that hurts.</strong>
+      <span>Use pain-free range and light loads. No overhead pressing, dips, upright rows or deep flyes for now. The dead hang puts the arm fully overhead: keep feet on a box at first and drop it if the shoulder aches. If pain, weakness or limited motion remains, get a physio to adjust exercises. This is a training plan, not rehab.</span>
+    </div>
+
+    <details class="box">
+      <summary>Warm-up · before every session (5–8 min)</summary>
+      <div class="in">
+        <ul class="clean">
+          <li>5 min easy bike or treadmill walk.</li>
+          <li>1–2 light ramp-up sets of the first exercise. These do not count as work sets.</li>
+          <li>Band external rotation, very light, 1–2 × 12. Only if pain-free.</li>
+        </ul>
+      </div>
+    </details>
+    <details class="box">
+      <summary>Stretches · after every session (4 min)</summary>
+      <div class="in">
+        <ul class="clean">
+          <li>Chest doorway stretch, elbow below shoulder — 2 × 20–30 s. Gentle; skip if the shoulder pinches.</li>
+          <li>Cross-body shoulder stretch — 2 × 20–30 s per side, only if comfortable.</li>
+          <li>Lat stretch on a rack, hips back — 2 × 20–30 s per side.</li>
+          <li>Hamstring stretch — 2 × 20–30 s per side.</li>
+          <li>Hip-flexor stretch (half kneel) — 2 × 20–30 s per side.</li>
+        </ul>
+        <p class="small muted">Never force an end range on the injured shoulder.</p>
+      </div>
+    </details>
+    <details class="box">
+      <summary>How to progress</summary>
+      <div class="in">
+        <ul class="clean">
+          <li><b>Weeks 1–2:</b> 2 sets of everything, light weight, learn the movement.</li>
+          <li><b>Effort:</b> end each set with 2–3 good reps left. No need to hit failure.</li>
+          <li><b>Add weight</b> when every set reaches the top of the rep range with clean form. Use the smallest jump.</li>
+          <li><b>Rest:</b> 90–150 s for presses, rows, pulldowns. 60–90 s for curls, triceps, core.</li>
+          <li><b>Short on time:</b> pair a curl with a pressdown, or an arm move with core.</li>
+          <li><b>Missed a day:</b> skip it. Don't stack it onto the next week.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <section class="panel" id="food" role="tabpanel" aria-labelledby="tab-food" hidden>
+    <div class="dayhead" id="foodHead"></div>
+    <div class="list" id="mealList"></div>
+
+    <div class="note">
+      <strong>Nut allergy: check every label.</strong>
+      <span>Recipes contain no nuts, but protein powder, doubanjiang, sauces and restaurant food can contain nuts or be made alongside them. Read the allergen statement and "may contain" line every time you buy.</span>
+    </div>
+
+    <details class="box" id="prepBox">
+      <summary>Sunday batch prep · about 75 min</summary>
+      <div class="in" id="prep"></div>
+    </details>
+
+    <details class="box">
+      <summary>Grocery list · one week</summary>
+      <div class="in">
+        <form class="groc" id="groc"></form>
+        <button class="btn" id="grocReset" type="button">Clear checks</button>
+      </div>
+    </details>
+
+    <details class="box">
+      <summary>Daily targets + supplements</summary>
+      <div class="in">
+        <ul class="clean">
+          <li><b>Protein:</b> 100–120 g a day (about 1.8–2.1 g per kg). The daily plan lands there.</li>
+          <li><b>Calories:</b> start near 2,000 a day. This is an estimate, not a measured number.</li>
+          <li><b>Adjust:</b> weigh in most mornings and compare weekly averages. If weight drops 2 weeks in a row, add about 150–200 kcal a day, mostly as rice. If waist grows fast, pull back a little.</li>
+          <li><b>Rice:</b> about 1 cup cooked per meal. White rice is fine.</li>
+          <li><b>Creatine monohydrate:</b> 3 g a day, every day, with any meal. No loading phase. Expect 1–2 lb of water weight early. Ask a doctor first if you have kidney problems.</li>
+          <li><b>Protein powder:</b> optional, for convenience. Whey isolate if dairy sits well, or soy isolate. Start with half a scoop.</li>
+          <li><b>Start supplements one at a time</b>, a week apart, so you can tell if one upsets your gut.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="box">
+      <summary>Gut: needing to go after every meal</summary>
+      <div class="in">
+        <p class="small">The gastrocolic reflex makes the colon move after eating. Larger, fattier meals trigger it more strongly. If it happens after every meal, see a primary-care doctor; a functional gut disorder can cause this.</p>
+        <ul class="clean small">
+          <li>Keep meals moderate in size. Go light on oil.</li>
+          <li>Mapo tofu: start with 1 tsp doubanjiang and skip chili oil.</li>
+          <li>Log meals, stool type, urgency, coffee and supplements for 1–2 weeks to bring to the doctor.</li>
+          <li>Cut only foods your log shows as triggers. No broad elimination diet.</li>
+        </ul>
+        <p class="small"><b>See a doctor promptly</b> for blood or black stool, severe belly pain, signs of dehydration, diarrhea lasting more than 2 days, or weight loss you can't explain.</p>
+      </div>
+    </details>
+  </section>
+
+  <details class="box">
+    <summary>Why this plan (evidence)</summary>
+    <div class="in" id="evidence"></div>
+  </details>
+
+  <footer id="credits"></footer>
+</main>
+
+<script>
+/* yt: YouTube demo id; short: true for vertical Shorts. */
+const EX = {
+  chestPress:  { name: "Machine chest press", img: "leverage-chest-press", yt: "VHIlmOPMWWs", short: true,
+    cue: "Handles at mid-chest, back flat on the pad. Lower only as far as the shoulder feels fine.", sh: true },
+  cablePress:  { name: "Standing cable chest press", img: "standing-cable-chest-press", yt: "u74FbPhR8iE",
+    cue: "Split stance, wrists straight, elbows a little below shoulder height. Stop if the front of the shoulder hurts.", sh: true },
+  lateral:     { name: "Lateral raise (cable or dumbbell)", img: "side-lateral-raise", yt: "qghfvzcoS2I",
+    cue: "Very light. Raise slightly forward of your sides, no higher than shoulder height. Skip if it irritates the shoulder.", sh: true },
+  pressdown:   { name: "Cable triceps pressdown", img: "triceps-pushdown", yt: "K--j4Qh9d2s",
+    cue: "Elbows pinned to your ribs. Only the forearms move. No body swing." },
+  crunch:      { name: "Kneeling cable crunch", img: "cable-crunch", yt: "0KEP6A1deBE",
+    cue: "Rope by your head, hips still. Curl your ribs toward your pelvis. Don't pull with your arms." },
+  csRow:       { name: "Chest-supported machine row", img: "leverage-iso-row", yt: "QpLTp2AJ_cI",
+    cue: "Chest stays on the pad. Pull elbows back toward your hips. Don't shrug." },
+  pulldown:    { name: "Lat pulldown (neutral or close grip)", img: "close-grip-front-lat-pulldown", yt: "jP7iqNMX2qI", short: true,
+    cue: "Pull to the upper chest, elbows down. Never behind the neck. Only a slight lean back." },
+  revPec:      { name: "Reverse pec deck", img: "reverse-machine-flyes", yt: "E4Q12zRDwwU",
+    cue: "Light weight. Sweep arms back until in line with your body, not past it. Skip if painful.", sh: true },
+  curl:        { name: "Cable biceps curl", img: "standing-biceps-cable-curl", yt: "CrbTqNOlFgE", short: true,
+    cue: "Upper arms by your sides, wrists straight, no rocking. Slow on the way down." },
+  hammer:      { name: "Dumbbell hammer curl", img: "hammer-curls", yt: "cGCbs0PNvW0", short: true,
+    cue: "Palms face each other. Elbows stay still. Lower for a 2-second count." },
+  cableRow:    { name: "Seated cable row", img: "seated-cable-rows", yt: "ZYG1ECFVPJI", short: true,
+    cue: "Sit tall, knees soft. Pull the handle to your lower ribs without rocking back." },
+  legPress:    { name: "Leg press", img: "leg-press", yt: "26DciWnfbRg", short: true,
+    cue: "Hips and lower back stay on the pad. Stop before your tailbone curls up." },
+  legCurl:     { name: "Seated leg curl", img: "seated-leg-curl", yt: "7PE3MlvGAts", short: true,
+    cue: "Line the machine pivot up with your knee. Smooth curl, slow return." },
+  hang:        { name: "Dead hang", img: "dead-hang", yt: "g0I7Jv3oqKw",
+    cue: "Shoulder-width overhand grip, ribs down. Start with feet touching a box to take some weight. Step down if the shoulder aches.", sh: true },
+  deadBug:     { name: "Dead bug", img: "dead-bug", yt: "g_BYB0R-4Ws",
+    cue: "Low back stays pressed down. Reach opposite arm and leg only as far as you stay braced." },
+  pallof:      { name: "Cable Pallof press", img: "pallof-press", yt: "SY5lRzBPtM4",
+    cue: "Stand side-on to the cable. Brace and press straight out. Don't let the torso twist." },
+  bike:        { name: "Stationary bike, easy", img: "bicycling-stationary", yt: "rlOOqDgDU3U",
+    cue: "Conversational pace. Seat high enough that the knee is slightly bent at the bottom." }
+};
+
+const PUSH = [["chestPress", 3, "8–12"], ["cablePress", 2, "10–12"], ["lateral", 2, "12–15"], ["pressdown", 3, "10–15"], ["crunch", 3, "10–15"]];
+const DAYS = [
+  { key: "mon", short: "Mon", name: "Monday",    title: "Push A + abs", sub: "Push", time: "50–60 min", ex: PUSH },
+  { key: "tue", short: "Tue", name: "Tuesday",   title: "Pull A + minimal legs", sub: "Pull", time: "55–60 min",
+    ex: [["csRow", 3, "8–12"], ["pulldown", 3, "8–12"], ["revPec", 2, "12–15"], ["curl", 3, "10–15"], ["legPress", 2, "8–12"], ["legCurl", 2, "10–15"], ["hang", 2, "20–30 s"], ["deadBug", 2, "8–10 / side"]] },
+  { key: "wed", short: "Wed", name: "Wednesday", title: "Recovery", sub: "Rest", time: "optional walk", ex: [] },
+  { key: "thu", short: "Thu", name: "Thursday",  title: "Push B + abs", sub: "Push", time: "50–60 min", ex: PUSH },
+  { key: "fri", short: "Fri", name: "Friday",    title: "Pull B + minimal legs", sub: "Pull", time: "55–60 min",
+    ex: [["cableRow", 3, "8–12"], ["pulldown", 3, "8–12"], ["revPec", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["legPress", 2, "8–12"], ["legCurl", 2, "10–15"], ["hang", 2, "20–30 s"], ["pallof", 2, "10 / side"]] },
+  { key: "sat", short: "Sat", name: "Saturday",  title: "Optional arms + easy cardio", sub: "Opt.", time: "20–30 min",
+    ex: [["curl", 2, "12–15"], ["pressdown", 2, "12–15"], ["deadBug", 2, "8–10 / side"], ["bike", 1, "15–20 min"]] },
+  { key: "sun", short: "Sun", name: "Sunday",    title: "Rest + meal prep", sub: "Rest", time: "full rest", ex: [] }
+];
+const REST_TEXT = {
+  wed: ["20–30 min easy walk, or skip it.", "Do the after-session stretches if you feel stiff.", "Eat normally and hit your protein. Sleep 7–9 h."],
+  sun: ["Full rest. A relaxed walk is fine.", "Do the Sunday batch prep in the Food tab.", "Missed a session this week? Let it go and start fresh Monday."]
+};
+
+const MEALS = {
+  eggs:    { name: "Eggs on rice", img: "eggs", time: "8 min", p: 16,
+    desc: "Two fried or scrambled eggs on rice, soy sauce on top.",
+    ing: ["2 eggs", "1 cup cooked white rice", "Soy sauce or furikake (check label)", "Optional: 250 ml soy milk on the side (+8 g protein)"],
+    steps: ["Microwave rice until steaming.", "Fry or scramble the eggs until set.", "Put eggs on rice, add a splash of soy sauce."] },
+  natto:   { name: "Natto + egg rice", img: "natto", time: "6 min", p: 18,
+    desc: "Natto with its sauce packet and one cooked egg over rice.",
+    ing: ["1 pack natto", "1 egg", "1 cup cooked white rice", "Scallion (optional)"],
+    steps: ["Microwave rice.", "Fry or soft-boil the egg.", "Stir natto with its sauce until stringy, then pile it and the egg on the rice."] },
+  chicken: { name: "Garlic chicken + veg bowl", img: "chicken", time: "reheat 3 min", p: 40, batch: "chicken",
+    desc: "Chinese-style garlic soy chicken with vegetables. From Sunday batch.",
+    ing: ["1 portion batch garlic chicken (150 g raw chicken)", "1 cup cooked white rice"],
+    steps: ["Microwave the portion 2–3 min until steaming hot all the way through.", "Serve over rice."] },
+  gyudon:  { name: "Gyudon", img: "gyudon", time: "reheat 3 min", p: 31, batch: "gyudon",
+    desc: "Sweet-savory simmered beef and onion over rice. From Sunday batch.",
+    ing: ["1 portion batch gyudon beef (150 g raw beef)", "1 cup cooked white rice", "Pickled ginger or scallion (optional)"],
+    steps: ["Microwave beef and some of its sauce until steaming.", "Spoon over hot rice."] },
+  mapo:    { name: "Mapo tofu with beef", img: "mapo", time: "reheat 3 min", p: 39, batch: "mapo",
+    desc: "Ground beef and soft tofu in a savory bean sauce. Mild version is fine. From Sunday batch.",
+    ing: ["1 portion batch mapo tofu", "1 cup cooked white rice"],
+    steps: ["Microwave covered, stirring halfway, until hot.", "Serve over rice."] },
+  oyako:   { name: "Oyakodon", img: "oyakodon", time: "15 min", p: 39,
+    desc: "Chicken and egg simmered with onion, poured over rice. One pan.",
+    ing: ["120 g chicken thigh, bite-size", "2 eggs, lightly beaten", "½ onion, sliced", "1 cup cooked white rice", "2 tbsp soy sauce", "1 tsp sugar", "½ cup water + ½ tsp dashi powder"],
+    steps: ["Simmer onion in water, dashi, soy sauce and sugar for 3 min.", "Add chicken, simmer 5–6 min until cooked through.", "Pour in eggs, cover, cook 1–2 min until set.", "Slide onto rice."] },
+  niku:    { name: "Niku-dofu", img: "nikudofu", time: "20 min", p: 38, makes: "Makes 2: eat 1, fridge 1 for Saturday lunch.",
+    desc: "Beef and tofu simmered in sweet soy broth. Cook 2 portions.",
+    ing: ["200 g thin-sliced beef (2 portions)", "300 g firm tofu, cubed", "1 onion, sliced", "4 tbsp soy sauce", "2 tsp sugar", "1 cup water + 1 tsp dashi powder", "Rice: 1 cup cooked per portion"],
+    steps: ["Simmer onion in water, dashi, soy sauce and sugar for 4 min.", "Add tofu and beef. Simmer 8–10 min until beef is cooked and tofu is hot.", "Eat half with rice. Cool the rest and refrigerate within 2 hours."] },
+  nikuL:   { name: "Niku-dofu (leftover)", img: "nikudofu", time: "reheat 3 min", p: 38,
+    desc: "Second portion from Thursday dinner.",
+    ing: ["1 portion niku-dofu from Thursday", "1 cup cooked white rice"],
+    steps: ["Microwave until steaming hot.", "Serve with rice."] },
+  salmon:  { name: "Salmon, rice + edamame", img: "salmon", time: "15 min", p: 37,
+    desc: "Salted pan-seared or air-fried salmon with rice and edamame.",
+    ing: ["120 g salmon fillet (frozen is fine)", "Pinch of salt", "1 cup cooked white rice", "½ cup shelled edamame", "Soy sauce, a little"],
+    steps: ["Salt the salmon. Air-fry at 200 °C / 400 °F for 9–11 min, or pan-sear 4 min per side, until 63 °C / 145 °F inside.", "Microwave edamame per the bag.", "Serve with rice."] },
+  shake:   { name: "Protein shake + banana", img: "shake", time: "2 min", p: 24,
+    desc: "One scoop nut-safe protein powder in water or soy milk, plus a banana.",
+    ing: ["1 scoop protein powder (20–25 g protein), nut allergen checked", "300 ml water or soy milk", "1 banana"],
+    steps: ["Shake powder with liquid for 15 s.", "First week: use half a scoop to test your gut."] },
+  edamame: { name: "Edamame + soy milk", img: "edamame", time: "5 min", p: 26,
+    desc: "A cup of shelled edamame with a glass of soy milk.",
+    ing: ["1 cup shelled frozen edamame", "250 ml soy milk (or lactose-free milk)", "Pinch of salt"],
+    steps: ["Microwave edamame per the bag.", "Salt lightly. Drink the milk alongside."] }
+};
+
+/* Batch: Sunday cook; anything eaten Thursday or later is frozen on Sunday. */
+const MENU = {
+  mon: [["Breakfast", "eggs"], ["Lunch", "chicken", "fridge"], ["Snack", "shake"], ["Dinner", "gyudon", "fridge"]],
+  tue: [["Breakfast", "natto"], ["Lunch", "chicken", "fridge"], ["Snack", "shake"], ["Dinner", "mapo", "fridge"]],
+  wed: [["Breakfast", "eggs"], ["Lunch", "gyudon", "fridge"], ["Snack", "shake"], ["Dinner", "oyako"]],
+  thu: [["Breakfast", "natto"], ["Lunch", "mapo", "freezer"], ["Snack", "shake"], ["Dinner", "niku"]],
+  fri: [["Breakfast", "eggs"], ["Lunch", "chicken", "freezer"], ["Snack", "edamame"], ["Dinner", "mapo", "freezer"]],
+  sat: [["Breakfast", "natto"], ["Lunch", "nikuL"], ["Snack", "shake"], ["Dinner", "salmon"]],
+  sun: [["Breakfast", "eggs"], ["Lunch", "oyako"], ["Snack", "shake"], ["Dinner", "gyudon", "fresh"]]
+};
+const STORE_TAG = {
+  fridge:  "From fridge",
+  freezer: "Thaw in fridge the night before",
+  fresh:   "Fresh from today's batch"
+};
+
+const PREP = [
+  { key: "gyudon", name: "Gyudon beef", img: "gyudon", time: "20 min", makes: "4 portions: Sun dinner, Mon dinner, Wed lunch, +1 spare (freeze)",
+    ing: ["600 g thin-sliced beef (shabu-shabu or sukiyaki cut)", "2 onions, sliced", "8 tbsp soy sauce", "4 tsp sugar", "2 cups water + 2 tsp dashi powder", "Grated ginger (optional)"],
+    steps: ["Simmer onion in water, dashi, soy sauce and sugar for 5 min until soft.", "Add beef, separate the slices, simmer 5 min until no pink remains. Skim foam.", "Eat 1 portion tonight. Split the rest into 3 containers with some sauce."] },
+  { key: "chicken", name: "Garlic chicken + veg", img: "chicken", time: "25 min", makes: "3 portions: Mon lunch, Tue lunch, Fri lunch",
+    ing: ["450 g chicken breast or thigh, bite-size", "4 cups frozen mixed vegetables", "4 cloves garlic, minced", "3 tbsp soy sauce", "½ cup chicken broth", "1 tbsp cornstarch", "1 tbsp neutral oil (not peanut oil)"],
+    steps: ["Heat oil, cook chicken 6–7 min until no pink remains.", "Add garlic for 30 s, then the vegetables, 3–4 min.", "Mix soy sauce, broth and cornstarch. Pour in and stir until glossy.", "Split into 3 containers."] },
+  { key: "mapo", name: "Mapo tofu with beef", img: "mapo", time: "25 min", makes: "3 portions: Tue dinner, Thu lunch, Fri dinner",
+    ing: ["300 g lean ground beef", "400 g firm tofu (1 block), 2 cm cubes", "1–2 tbsp doubanjiang (check allergens; start low)", "2 cloves garlic + 1 tsp ginger, minced", "1 cup chicken broth", "1 tbsp soy sauce", "1 tbsp cornstarch in 2 tbsp cold water", "Scallions"],
+    steps: ["Brown the beef 5 min. Pour off extra fat.", "Stir in garlic, ginger and doubanjiang for 30 s.", "Add broth, soy sauce and tofu. Simmer gently 5–8 min.", "Stir in the cornstarch slurry until thick. Top with scallions.", "Split into 3 containers."] }
+];
+const PREP_RULES = [
+  "Cook rice for 3–4 days at a time. Portion 1 cup per container while warm, cool, then fridge or freeze. Microwave with a splash of water.",
+  "Cool food and get it in the fridge within 2 hours.",
+  "Fridge portions: eat within 3–4 days (Mon–Wed meals).",
+  "Freezer portions: Thu–Fri meals. Move each to the fridge the night before.",
+  "Reheat until steaming hot all the way through."
+];
+
+const GROCERY = [
+  ["Protein", ["Chicken breast or thigh — 700 g", "Thin-sliced beef — 800 g", "Lean ground beef — 300 g", "Eggs — 18", "Firm tofu — 700 g (2 blocks)", "Natto — 3 packs", "Salmon fillet — 1 (120 g)", "Protein powder, nut-safe — 6 servings"]],
+  ["Rice + pantry", ["White rice — about 1.5 kg a week", "Soy sauce", "Dashi powder", "Chicken broth", "Doubanjiang (check allergens)", "Cornstarch", "Sugar", "Neutral oil (not peanut)"]],
+  ["Produce + frozen", ["Onions — 4", "Garlic — 1 head", "Ginger — 1 small knob", "Scallions — 1 bunch", "Frozen mixed vegetables — 1 bag (about 600 g)", "Shelled frozen edamame — 1 bag", "Bananas — 6", "Soy milk or lactose-free milk — 1 L"]]
+];
+
+const EVIDENCE = [
+  { t: "Volume and effort",
+    e: "ACSM's 2026 position stand (an overview of 137 reviews) links about 10+ hard sets per muscle per week to muscle growth, with sets taken close to failure; absolute failure is not required.",
+    r: "A beginner grows from modest volume if it's consistent and progressive.",
+    d: "Chest and back get 10–12 weekly sets. Every set stops 2–3 reps short of failure.",
+    src: [["ACSM 2026 position stand", "https://doi.org/10.1249/MSS.0000000000003897"], ["ACSM summary", "https://acsm.org/resistance-training-guidelines-update-2026/"]] },
+  { t: "Split choice",
+    e: "A 2024 meta-analysis (14 studies, 392 people) found split and full-body routines give similar strength and muscle gains when weekly volume matches.",
+    r: "No split is magic. Pick the one you'll actually attend.",
+    d: "4-day push/pull, because you have 4–5 days and want minimal legs. Legs get 4 sets each a week, so expect little leg growth.",
+    src: [["Ramos-Campo et al., JSCR 2024", "https://journals.lww.com/nsca-jscr/fulltext/2024/07000/efficacy_of_split_versus_full_body_resistance.20.aspx"]] },
+  { t: "Protein",
+    e: "The ISSN position stand recommends 1.4–2.0 g/kg/day for people who train; a 2018 meta-analysis saw gains plateau around 1.6 g/kg (upper range about 2.2).",
+    r: "At 56.7 kg, 100–120 g covers the useful range with margin.",
+    d: "Each day's menu lands near 110–120 g.",
+    src: [["ISSN protein stand", "https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/"], ["Morton et al. 2018", "https://pubmed.ncbi.nlm.nih.gov/28698222/"]] },
+  { t: "Creatine",
+    e: "Creatine monohydrate is the best-studied supplement for strength and lean mass; 3–5 g a day saturates muscle over about 3–4 weeks without loading.",
+    r: "Cheap, safe for healthy adults, small but real benefit.",
+    d: "3 g a day. Start it separately from protein powder to check your gut.",
+    src: [["ISSN creatine stand", "https://pmc.ncbi.nlm.nih.gov/articles/PMC5469049/"], ["NIH ODS fact sheet", "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/"]] },
+  { t: "Abs",
+    e: "In a 6-week trial, people doing ab exercises 5 days a week lost no more belly fat than a group that didn't. Spot reduction doesn't work.",
+    r: "Visible abs need trained ab muscle plus low enough body fat to see it.",
+    d: "Weighted cable crunches 2× a week build the abs. Training and protein slowly cut the fat over them. Dead bug and Pallof train bracing. Dead hangs build grip and stretch the lats; they add little muscle.",
+    src: [["Vispute et al., JSCR 2011", "https://pubmed.ncbi.nlm.nih.gov/21804427/"]] },
+  { t: "Shoulder",
+    e: "AAOS advises not exercising through pain and getting clinician guidance after shoulder injury.",
+    r: "Your old injury is unknown, so no exercise here is guaranteed safe.",
+    d: "Supported machines, neutral grips, no overhead pressing; skip any move that hurts.",
+    src: [["AAOS shoulder program", "https://orthoinfo.aaos.org/en/recovery/rotator-cuff-and-shoulder-conditioning-program/"]] },
+  { t: "Gut",
+    e: "The gastrocolic reflex is normal and is stronger after large or high-fat meals; urgency after every meal can signal a functional gut disorder. NIDDK lists warning signs for diarrhea.",
+    r: "Smaller, lower-fat meals may help, but persistent symptoms need a doctor.",
+    d: "4 moderate meals, light oil, mild mapo option, symptom log, doctor visit.",
+    src: [["Cleveland Clinic", "https://my.clevelandclinic.org/health/body/gastrocolic-reflex"], ["NIDDK diarrhea", "https://www.niddk.nih.gov/health-information/digestive-diseases/diarrhea/symptoms-causes"]] }
+];
+
+const FOOD_CREDITS = [
+  ["Gyudon", "Ocdp", "CC0", "https://commons.wikimedia.org/wiki/File:Gyuu-don_001.jpg"],
+  ["Mapo tofu", "Sichuanfoodlover", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Authentic_Mapo_Tofu.jpg"],
+  ["Oyakodon", "Ocdp", "CC0", "https://commons.wikimedia.org/wiki/File:Oyakodon_003.jpg"],
+  ["Niku-dofu", "ayustety", "CC BY-SA 2.0", "https://commons.wikimedia.org/wiki/File:%E8%82%89%E8%B1%86%E8%85%90_(57036312).jpg"],
+  ["Natto rice", "ノボホショコロトソ", "CC BY 4.0", "https://commons.wikimedia.org/wiki/File:Natto_gohan_in_Kochi.jpg"],
+  ["Egg rice", "Bibazi", "CC BY 4.0", "https://commons.wikimedia.org/wiki/File:Rice_bowl_with_sunny_side_egg.jpg"],
+  ["Chicken stir-fry", "Ginny", "CC BY-SA 2.0", "https://commons.wikimedia.org/wiki/File:Ginger_chicken_(3168342551).jpg"],
+  ["Salmon set", "nesnad", "CC BY 3.0", "https://commons.wikimedia.org/wiki/File:Salt_grilled_salmon_teishoku_-_August_2014.jpg"],
+  ["Edamame", "Fumikas Sagisavas", "CC0", "https://commons.wikimedia.org/wiki/File:Shelled_edamame_beans.jpg"],
+  ["Protein shake", "Sandstein", "CC BY 3.0", "https://commons.wikimedia.org/wiki/File:Protein_shake.jpg"]
+];
+
+/* ---------- state ---------- */
+const STORE_KEY = "hosomacho_v2";
+const GROC_KEY = "hosomacho_grocery_v2";
+function mondayOf(d) {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  return x;
+}
+const thisMonday = mondayOf(new Date());
+const weekId = thisMonday.toISOString().slice(0, 10);
+function load(key, fallback) {
+  try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
+}
+function save(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch {} }
+let state = load(STORE_KEY, null);
+if (!state || state.week !== weekId) state = { week: weekId, gym: {}, food: {}, tab: state?.tab || "gym" };
+let groc = load(GROC_KEY, {});
+const todayKey = DAYS[(new Date().getDay() + 6) % 7].key;
+let day = todayKey;
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function imgFail(img, text) {
+  img.addEventListener("error", () => {
+    const box = img.parentElement;
+    box.querySelectorAll("img").forEach(i => i.remove());
+    if (!box.querySelector(".fallback")) box.insertAdjacentHTML("beforeend", `<span class="fallback">${esc(text)}<br>(photo didn't load)</span>`);
+  }, { once: true });
+}
+
+/* ---------- header ---------- */
+function renderDays() {
+  const fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
+  const end = new Date(thisMonday); end.setDate(end.getDate() + 6);
+  $("#weekLabel").textContent = `Week of ${fmt.format(thisMonday)} – ${fmt.format(end)}`;
+  $("#days").innerHTML = DAYS.map(d => `
+    <button type="button" data-day="${d.key}" aria-pressed="${d.key === day}" class="${d.key === todayKey ? "today" : ""}"
+      aria-label="${d.name}: ${d.title}${d.key === todayKey ? " (today)" : ""}">
+      <b>${d.short}</b><small>${d.sub}</small>
+    </button>`).join("");
+}
+$("#days").addEventListener("click", e => {
+  const b = e.target.closest("[data-day]"); if (!b) return;
+  day = b.dataset.day; renderDays(); renderGym(); renderFood();
+});
+document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
+function setTab(t) {
+  state.tab = t; save(STORE_KEY, state);
+  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
+  $("#gym").hidden = t !== "gym"; $("#food").hidden = t !== "food";
+}
+
+/* ---------- gym ---------- */
+function renderGym() {
+  renderGymHead();
+  const d = DAYS.find(x => x.key === day);
+  const done = state.gym[day] || {};
+  if (!d.ex.length) {
+    $("#gymList").innerHTML = `<div class="ex"><div class="body"><h3>${d.key === "wed" ? "Recovery day" : "Rest day"}</h3>
+      <ul class="clean">${REST_TEXT[d.key].map(t => `<li>${t}</li>`).join("")}</ul></div></div>`;
+    return;
+  }
+  renderGymList(d, done);
+}
+function renderGymHead() {
+  const d = DAYS.find(x => x.key === day);
+  const done = state.gym[day] || {};
+  const total = d.ex.reduce((n, [, s]) => n + s, 0);
+  const count = d.ex.reduce((n, [, s], i) => n + Array.from({ length: s }, (_, k) => done[`${i}.${k}`]).filter(Boolean).length, 0);
+  const pct = total ? Math.round(count / total * 100) : 0;
+  $("#gymHead").innerHTML = `
+    <span class="label">${d.name}${d.key === todayKey ? " · today" : ""}</span>
+    <h2>${esc(d.title)}</h2>
+    <div class="row">
+      <span class="chip">${d.time}</span>
+      ${total ? `<span class="chip ${count === total ? "done" : ""}" id="gymCount"><span class="mono">${count}/${total}</span> sets done</span>` : ""}
+      ${d.key === "sat" ? `<span class="chip accent">Skip if tired or busy</span>` : ""}
+    </div>
+    ${total ? `<div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div>` : ""}`;
+}
+function renderGymList(d, done) {
+  $("#gymList").innerHTML = d.ex.map(([id, sets, reps], i) => {
+    const x = EX[id];
+    const allDone = Array.from({ length: sets }, (_, k) => done[`${i}.${k}`]).every(Boolean);
+    return `
+    <article class="ex ${allDone ? "complete" : ""}" data-i="${i}">
+      <div class="media${x.short ? " short" : ""}">
+        <button class="play" type="button" data-play="${id}" aria-label="Play ${esc(x.name)} demo video">
+          <img src="img/ex/${x.img}-0.webp" alt="${esc(x.name)}" loading="lazy" decoding="async">
+          <span class="tag">Play demo</span>
+        </button>
+      </div>
+      <div class="body">
+        <div class="top">
+          <div><span class="num">${String(i + 1).padStart(2, "0")}</span><h3>${esc(x.name)}</h3></div>
+          <span class="sr">${sets} × ${reps}</span>
+        </div>
+        <p class="cue">${esc(x.cue)}</p>
+        ${x.sh ? `<p class="sh">Shoulder: pain-free range only. Skip if it hurts.</p>` : ""}
+        <div class="sets" role="group" aria-label="Sets for ${esc(x.name)}">
+          ${Array.from({ length: sets }, (_, k) => `<button type="button" data-set="${i}.${k}" aria-pressed="${!!done[`${i}.${k}`]}">${sets === 1 ? "Done" : `Set ${k + 1}`}</button>`).join("")}
+        </div>
+        <div class="links"><a href="https://www.youtube.com/${x.short ? "shorts/" : "watch?v="}${x.yt}" target="_blank" rel="noopener">Open in YouTube ↗</a></div>
+      </div>
+    </article>`;
+  }).join("");
+  $("#gymList").querySelectorAll("[data-play]").forEach(b => imgFail(b.querySelector("img"), EX[b.dataset.play].name));
+}
+$("#gymList").addEventListener("click", e => {
+  const s = e.target.closest("[data-set]");
+  if (s) {
+    const m = (state.gym[day] ||= {});
+    m[s.dataset.set] = !m[s.dataset.set];
+    save(STORE_KEY, state);
+    s.setAttribute("aria-pressed", m[s.dataset.set]);
+    const card = s.closest(".ex");
+    card.classList.toggle("complete", [...card.querySelectorAll("[data-set]")].every(b => b.getAttribute("aria-pressed") === "true"));
+    renderGymHead();
+    return;
+  }
+  const p = e.target.closest("[data-play]");
+  if (p) playDemo(p);
+});
+/* Loads the embed only on tap: muted + looping so it behaves like a GIF between sets. */
+function playDemo(btn) {
+  const x = EX[btn.dataset.play];
+  const box = btn.parentElement;
+  const q = new URLSearchParams({ autoplay: 1, mute: 1, loop: 1, playlist: x.yt, playsinline: 1, rel: 0 });
+  box.classList.add("playing");
+  box.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${x.yt}?${q}" title="${esc(x.name)} demo"
+    allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+}
+
+/* ---------- food ---------- */
+function renderFood() {
+  const d = DAYS.find(x => x.key === day);
+  const menu = MENU[day];
+  const eaten = state.food[day] || {};
+  const protein = menu.reduce((n, [, id]) => n + MEALS[id].p, 0);
+  const count = menu.filter((_, i) => eaten[i]).length;
+  const got = menu.reduce((n, [, id], i) => n + (eaten[i] ? MEALS[id].p : 0), 0);
+  $("#foodHead").innerHTML = `
+    <span class="label">${d.name}${d.key === todayKey ? " · today" : ""} · ${esc(d.title)} day</span>
+    <h2>What you eat today</h2>
+    <div class="row">
+      <span class="chip accent">Plan: ~<span class="mono">${protein}</span> g protein</span>
+      <span class="chip ${count === menu.length ? "done" : ""}"><span class="mono">${count}/${menu.length}</span> eaten · ~<span class="mono">${got}</span> g</span>
+      <span class="chip">~2,000 kcal target</span>
+    </div>
+    <div class="bar" aria-hidden="true"><i style="width:${Math.min(100, Math.round(got / 110 * 100))}%"></i></div>
+    <p class="small muted">Protein numbers are estimates from raw weights. Swap whole days if your week changes.</p>`;
+
+  $("#mealList").innerHTML = menu.map(([when, id, store], i) => {
+    const m = MEALS[id];
+    return `
+    <article class="meal ${eaten[i] ? "eaten" : ""}">
+      <div class="photo">
+        <img src="img/food/${m.img}.webp" alt="${esc(m.name)}" loading="lazy" decoding="async">
+        <span class="when">${when}</span>
+      </div>
+      <div class="body">
+        <h3>${esc(m.name)}</h3>
+        <div class="meta">
+          <span class="chip"><span class="mono">~${m.p} g</span> protein</span>
+          <span class="chip">${m.time}</span>
+          ${store ? `<span class="chip accent">${STORE_TAG[store]}</span>` : ""}
+        </div>
+        <p class="small">${esc(m.desc)}</p>
+        ${m.makes ? `<p class="small muted">${esc(m.makes)}</p>` : ""}
+        <details>
+          <summary>Ingredients + steps</summary>
+          <div class="in">
+            <ul class="clean small">${m.ing.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+            <ol class="steps small">${m.steps.map(t => `<li>${esc(t)}</li>`).join("")}</ol>
+            ${m.batch ? `<p class="small muted">Batch recipe is in "Sunday batch prep" below.</p>` : ""}
+          </div>
+        </details>
+        <button class="eat" type="button" data-eat="${i}" aria-pressed="${!!eaten[i]}">${eaten[i] ? "Eaten ✓" : "Mark eaten"}</button>
+      </div>
+    </article>`;
+  }).join("");
+  $("#mealList").querySelectorAll(".photo img").forEach((img, i) => imgFail(img, MEALS[menu[i][1]].name));
+}
+$("#mealList").addEventListener("click", e => {
+  const b = e.target.closest("[data-eat]"); if (!b) return;
+  const m = (state.food[day] ||= {});
+  m[b.dataset.eat] = !m[b.dataset.eat];
+  save(STORE_KEY, state);
+  const open = [...$("#mealList").querySelectorAll("details")].map(x => x.open);
+  const y = window.scrollY; renderFood();
+  $("#mealList").querySelectorAll("details").forEach((x, i) => x.open = open[i]);
+  window.scrollTo(0, y);
+});
+
+function renderPrep() {
+  $("#prep").innerHTML = `
+    <ul class="clean small">${PREP_RULES.map(t => `<li>${t}</li>`).join("")}</ul>
+    ${PREP.map(r => `
+      <article class="meal">
+        <div class="photo"><img src="img/food/${r.img}.webp" alt="${esc(r.name)}" loading="lazy" decoding="async"><span class="when">Batch</span></div>
+        <div class="body">
+          <h3>${esc(r.name)}</h3>
+          <div class="meta"><span class="chip">${r.time}</span><span class="chip accent">${esc(r.makes)}</span></div>
+          <ul class="clean small">${r.ing.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+          <ol class="steps small">${r.steps.map(t => `<li>${esc(t)}</li>`).join("")}</ol>
+        </div>
+      </article>`).join("")}`;
+  $("#prep").querySelectorAll(".photo img").forEach((img, i) => imgFail(img, PREP[i].name));
+}
+
+function renderGroc() {
+  $("#groc").innerHTML = GROCERY.map(([title, items], g) => `
+    <fieldset><legend class="label">${title}</legend>
+      ${items.map((t, k) => { const id = `g${g}-${k}`; return `<label for="${id}"><input type="checkbox" id="${id}" ${groc[id] ? "checked" : ""}><span>${esc(t)}</span></label>`; }).join("")}
+    </fieldset>`).join("");
+}
+$("#groc").addEventListener("change", e => { groc[e.target.id] = e.target.checked; save(GROC_KEY, groc); });
+let armTimer;
+$("#grocReset").addEventListener("click", e => {
+  const b = e.currentTarget;
+  if (!b.classList.contains("armed")) {
+    b.classList.add("armed"); b.textContent = "Tap again to clear all";
+    armTimer = setTimeout(() => { b.classList.remove("armed"); b.textContent = "Clear checks"; }, 3000);
+    return;
+  }
+  clearTimeout(armTimer); groc = {}; save(GROC_KEY, groc); renderGroc();
+  b.classList.remove("armed"); b.textContent = "Cleared";
+  setTimeout(() => { b.textContent = "Clear checks"; }, 1500);
+});
+
+/* ---------- static sections ---------- */
+$("#evidence").innerHTML = EVIDENCE.map(x => `
+  <div class="ev">
+    <h3>${x.t}</h3>
+    <p><span class="k">Evidence</span> ${esc(x.e)}</p>
+    <p><span class="k">Reasoning</span> ${esc(x.r)}</p>
+    <p><span class="k">Decision</span> ${esc(x.d)}</p>
+    <p class="small">${x.src.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(n)} ↗</a>`).join(" · ")}</p>
+  </div>`).join("");
+$("#credits").innerHTML = `
+  <p>Checkmarks save in this browser only and reset each Monday. Grocery checks stay until you clear them.</p>
+  <p>Demo videos are embedded from YouTube and belong to their creators. Cover photos: <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener">free-exercise-db</a> (public domain).
+  Food photos via Wikimedia Commons: ${FOOD_CREDITS.map(([n, a, l, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(n)}</a> by ${esc(a)}, ${l}`).join("; ")}.</p>
+  <p>Training and nutrition guide only. Not medical advice.</p>`;
+
+renderDays(); renderGym(); renderFood(); renderPrep(); renderGroc(); setTab(state.tab === "food" ? "food" : "gym");
+</script>
