@@ -261,7 +261,7 @@ footer { font-size: .78rem; color: var(--muted); display: grid; gap: 6px; }
           <li><b>Effort:</b> end each set with 2–3 good reps left. No need to hit failure.</li>
           <li><b>Add weight</b> when every set reaches the top of the rep range with clean form. Use the smallest jump.</li>
           <li><b>Rest:</b> 90–150 s for presses, rows, pulldowns. 60–90 s for curls, triceps, core.</li>
-          <li><b>Short on time:</b> pair a curl with a pressdown, or an arm move with core.</li>
+          <li><b>Short on time:</b> pair a curl with a triceps extension, or an arm move with core.</li>
           <li><b>Missed a day:</b> skip it. Don't stack it onto the next week.</li>
         </ul>
       </div>
@@ -299,7 +299,9 @@ footer { font-size: .78rem; color: var(--muted); display: grid; gap: 6px; }
           <li><b>Adjust:</b> weigh in most mornings and compare weekly averages. If weight drops 2 weeks in a row, add about 150–200 kcal a day, mostly as rice. If waist grows fast, pull back a little.</li>
           <li><b>Rice:</b> about 1 cup cooked per meal. White rice is fine.</li>
           <li><b>Creatine monohydrate:</b> 3 g a day, every day, with any meal. No loading phase. Expect 1–2 lb of water weight early. Ask a doctor first if you have kidney problems.</li>
-          <li><b>Protein powder:</b> optional, for convenience. Whey isolate if dairy sits well, or soy isolate. Start with half a scoop.</li>
+          <li><b>Protein shakes:</b> 1 a day is built into the menu. Have a 2nd on any day you eat less than the plan (skipped lunch, small office breakfast, no appetite). Make that one with soy milk and a banana so it adds calories too, about 350 kcal.</li>
+          <li><b>Protein powder:</b> whey isolate if dairy sits well, or soy isolate. Start with half a scoop. Two shakes a day is fine for healthy kidneys; stop at two and get the rest from food.</li>
+          <li><b>Office breakfast:</b> burrito is the best pick, then frittata, then McMuffin (1–2× a week). Yogurt + fruit alone is only about 5–10 g protein; if that's all there is, have your shake mid-morning instead of the afternoon.</li>
           <li><b>Start supplements one at a time</b>, a week apart, so you can tell if one upsets your gut.</li>
         </ul>
       </div>
@@ -333,26 +335,26 @@ footer { font-size: .78rem; color: var(--muted); display: grid; gap: 6px; }
 const EX = {
   chestPress:  { name: "Machine chest press", img: "leverage-chest-press", yt: "VHIlmOPMWWs", short: true,
     cue: "Handles at mid-chest, back flat on the pad. Lower only as far as the shoulder feels fine.", sh: true },
-  cablePress:  { name: "Standing cable chest press", img: "standing-cable-chest-press", yt: "u74FbPhR8iE",
-    cue: "Split stance, wrists straight, elbows a little below shoulder height. Stop if the front of the shoulder hurts.", sh: true },
-  lateral:     { name: "Lateral raise (cable or dumbbell)", img: "side-lateral-raise", yt: "qghfvzcoS2I",
-    cue: "Very light. Raise slightly forward of your sides, no higher than shoulder height. Skip if it irritates the shoulder.", sh: true },
-  pressdown:   { name: "Cable triceps pressdown", img: "triceps-pushdown", yt: "K--j4Qh9d2s",
-    cue: "Elbows pinned to your ribs. Only the forearms move. No body swing." },
+  cableFly:    { name: "Single-arm cable chest fly", img: "cable-fly", yt: "hYg9KkHk1lE",
+    cue: "Pulley at chest height, slight elbow bend. Sweep the handle across to the middle of your chest. Stop when your hand is in line with your body; no deep stretch behind it.", sh: true },
+  lateral:     { name: "Cable lateral raise", img: "cable-lateral", yt: "qghfvzcoS2I",
+    cue: "Low pulley, cable crossing in front of you. Very light. Raise slightly forward of your side, no higher than shoulder height.", sh: true },
+  overhead:    { name: "Cable overhead triceps extension", img: "overhead-triceps", yt: "NTk0Igxqcsk", short: true,
+    cue: "Face away from a high pulley, lean forward, elbows by your ears. Straighten the arms, then let the hands come back slowly. If the shoulder pinches overhead, lean further forward so the arms point more ahead than up.", sh: true },
   crunch:      { name: "Kneeling cable crunch", img: "cable-crunch", yt: "0KEP6A1deBE",
     cue: "Rope by your head, hips still. Curl your ribs toward your pelvis. Don't pull with your arms." },
-  dbRow:       { name: "One-arm dumbbell row", img: "db-row", yt: "2AUbzsDCgaQ",
-    cue: "Knee and hand on a bench, back flat. Pull the dumbbell toward your hip, not your armpit. Don't twist." },
+  singleRow:   { name: "Standing single-arm cable row", img: "cable-row-1arm", yt: "pBbbR6ypIEs",
+    cue: "Staggered stance, free hand on the machine. Let the shoulder reach forward, then pull the handle to your hip. Torso stays still." },
   pulldown:    { name: "Lat pulldown (neutral or close grip)", img: "close-grip-front-lat-pulldown", yt: "oMJmAHRZXBk", short: true,
     cue: "Pull to the upper chest, elbows down. Never behind the neck. Only a slight lean back." },
   facePull:    { name: "Cable face pull", img: "face-pull", yt: "7z65m-qWJrA",
     cue: "Rope at chest-to-face height, light weight. Pull toward your eyes, hands apart, elbows no higher than shoulders. Skip if painful.", sh: true },
   curl:        { name: "Cable biceps curl", img: "standing-biceps-cable-curl", yt: "CrbTqNOlFgE", short: true,
     cue: "Upper arms by your sides, wrists straight, no rocking. Slow on the way down." },
-  hammer:      { name: "Dumbbell hammer curl", img: "hammer-curls", yt: "cGCbs0PNvW0", short: true,
-    cue: "Palms face each other. Elbows stay still. Lower for a 2-second count." },
-  cableRow:    { name: "Seated cable row", img: "seated-cable-rows", yt: "ZYG1ECFVPJI", short: true,
-    cue: "Sit tall, knees soft. Pull the handle to your lower ribs without rocking back." },
+  hammer:      { name: "Cable rope hammer curl", img: "cable-hammer", yt: "vsarApmqJmo",
+    cue: "Rope on the low pulley, thumbs up. Elbows pinned to your sides, curl, then lower for a 2-second count." },
+  wristExt:    { name: "Dumbbell wrist extension", img: "wrist-ext", yt: "N284Q08Ne2g", short: true,
+    cue: "Forearm on your thigh or a bench, palm down, wrist past the edge. Lift the back of the hand up, lower slowly. Light weight, full range." },
   legPress:    { name: "Leg press", img: "leg-press", yt: "26DciWnfbRg", short: true,
     cue: "Hips and lower back stay on the pad. Stop before your tailbone curls up." },
   legCurl:     { name: "Seated leg curl", img: "seated-leg-curl", yt: "7PE3MlvGAts", short: true,
@@ -370,27 +372,25 @@ const EX = {
   deadBug:     { name: "Dead bug", img: "dead-bug", yt: "g_BYB0R-4Ws", noLoad: true,
     cue: "Low back stays pressed down. Reach opposite arm and leg only as far as you stay braced." },
   pallof:      { name: "Cable Pallof press", img: "pallof-press", yt: "SY5lRzBPtM4",
-    cue: "Stand side-on to the cable. Brace and press straight out. Don't let the torso twist." },
-  bike:        { name: "Stationary bike, easy", img: "bicycling-stationary", yt: "rlOOqDgDU3U", noLoad: true,
-    cue: "Conversational pace. Seat high enough that the knee is slightly bent at the bottom." }
+    cue: "Stand side-on to the cable. Brace and press straight out. Don't let the torso twist." }
 };
 
-const PUSH = [["chestPress", 3, "8–12"], ["cablePress", 2, "10–12"], ["lateral", 2, "12–15"], ["pressdown", 3, "10–15"], ["crunch", 3, "10–15"]];
+const PUSH = [["chestPress", 3, "8–12"], ["cableFly", 2, "12–15 / side"], ["lateral", 3, "12–15 / side"], ["overhead", 3, "10–15"], ["crunch", 3, "10–15"]];
+const PULL = core => [["singleRow", 3, "10–12 / side"], ["pulldown", 3, "8–12"], ["facePull", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["wristExt", 2, "15–20"], ["hang", 2, "20–30 s"], core];
+/* Weekdays carry the rest days; the weekend has more time for the gym. */
 const DAYS = [
-  { key: "mon", short: "Mon", name: "Monday",    title: "Push A + abs", sub: "Push", time: "50–60 min", ex: PUSH },
-  { key: "tue", short: "Tue", name: "Tuesday",   title: "Pull A", sub: "Pull", time: "45–55 min",
-    ex: [["dbRow", 3, "8–12 / side"], ["pulldown", 3, "8–12"], ["facePull", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["hang", 2, "20–30 s"], ["deadBug", 2, "8–10 / side"]] },
+  { key: "mon", short: "Mon", name: "Monday",    title: "Rest", sub: "Rest", time: "full rest", ex: [] },
+  { key: "tue", short: "Tue", name: "Tuesday",   title: "Pull A", sub: "Pull", time: "50–60 min", ex: PULL(["deadBug", 2, "8–10 / side"]) },
   { key: "wed", short: "Wed", name: "Wednesday", title: "Legs", sub: "Legs", time: "45–55 min",
     ex: [["legPress", 3, "8–12"], ["goblet", 3, "8–12"], ["rdl", 3, "8–10"], ["legCurl", 3, "10–15"], ["legExt", 2, "12–15"], ["calf", 3, "12–15"]] },
-  { key: "thu", short: "Thu", name: "Thursday",  title: "Push B + abs", sub: "Push", time: "50–60 min", ex: PUSH },
-  { key: "fri", short: "Fri", name: "Friday",    title: "Pull B", sub: "Pull", time: "45–55 min",
-    ex: [["cableRow", 3, "8–12"], ["pulldown", 3, "8–12"], ["facePull", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["hang", 2, "20–30 s"], ["pallof", 2, "10 / side"]] },
-  { key: "sat", short: "Sat", name: "Saturday",  title: "Optional arms + easy cardio", sub: "Opt.", time: "20–30 min",
-    ex: [["curl", 2, "12–15"], ["pressdown", 2, "12–15"], ["deadBug", 2, "8–10 / side"], ["bike", 1, "15–20 min"]] },
-  { key: "sun", short: "Sun", name: "Sunday",    title: "Rest + meal prep", sub: "Rest", time: "full rest", ex: [] }
+  { key: "thu", short: "Thu", name: "Thursday",  title: "Push A + abs", sub: "Push", time: "50–60 min", ex: PUSH },
+  { key: "fri", short: "Fri", name: "Friday",    title: "Rest", sub: "Rest", time: "full rest", ex: [] },
+  { key: "sat", short: "Sat", name: "Saturday",  title: "Pull B", sub: "Pull", time: "50–60 min", ex: PULL(["pallof", 2, "10 / side"]) },
+  { key: "sun", short: "Sun", name: "Sunday",    title: "Push B + abs", sub: "Push", time: "50–60 min", ex: PUSH }
 ];
 const REST_TEXT = {
-  sun: ["Full rest. A relaxed walk is fine.", "Do the Sunday batch prep in the Food tab.", "Missed a session this week? Let it go and start fresh Monday."]
+  mon: ["Full rest after two weekend sessions. A 20–30 min walk is fine.", "Do the after-session stretches if you feel stiff.", "Eat the full menu and hit your protein."],
+  fri: ["Rest before the weekend sessions. A relaxed walk is fine.", "Check you have food for the weekend; batch prep is Sunday after the gym.", "Missed a session this week? Let it go and pick up with the next one."]
 };
 
 const MEALS = {
@@ -402,6 +402,18 @@ const MEALS = {
     desc: "Natto with its sauce packet and one cooked egg over rice.",
     ing: ["1 pack natto", "1 egg", "1 cup cooked white rice", "Scallion (optional)"],
     steps: ["Microwave rice.", "Fry or soft-boil the egg.", "Stir natto with its sauce until stringy, then pile it and the egg on the rice."] },
+  burrito: { name: "Office protein breakfast burrito", img: "burrito", time: "grab + go", p: 20,
+    desc: "Best office pick: eggs plus meat or cheese in a tortilla. Protein varies; check the label if there is one.",
+    ing: ["1 breakfast burrito from the office", "Fruit on the side if available"],
+    steps: ["Grab it, eat it.", "If it lists under 15 g protein, add the yogurt or have your shake earlier."] },
+  frittata: { name: "Office frittata", img: "frittata", time: "grab + go", p: 14,
+    desc: "A frittata is an Italian baked omelette: eggs baked with vegetables and cheese, cut into slices. Take two slices if they're small.",
+    ing: ["1 large or 2 small slices of frittata (about 2–3 eggs' worth)", "Fruit on the side if available"],
+    steps: ["Take the bigger slice, or two.", "Light day on protein: add yogurt or bring the shake forward."] },
+  mcmuffin: { name: "Sausage Egg McMuffin", img: "mcmuffin", time: "grab + go", p: 20,
+    desc: "About 480 kcal and 20 g protein, but 31 g fat. Fatty meals trigger the after-meal gut reflex harder, so keep it to 1–2 days a week.",
+    ing: ["1 Sausage McMuffin with Egg", "Skip the hash brown"],
+    steps: ["Eat it with water rather than coffee if your gut is touchy that morning."] },
   chicken: { name: "Garlic chicken + veg bowl", img: "chicken", time: "reheat 3 min", p: 40, batch: "chicken",
     desc: "Chinese-style garlic soy chicken with vegetables. From Sunday batch.",
     ing: ["1 portion batch garlic chicken (150 g raw chicken)", "1 cup cooked white rice"],
@@ -426,6 +438,11 @@ const MEALS = {
     desc: "Second portion from Thursday dinner.",
     ing: ["1 portion niku-dofu from Thursday", "1 cup cooked white rice"],
     steps: ["Microwave until steaming hot.", "Serve with rice."] },
+  enoki:   { name: "Enoki beef rolls, gyudon-style", img: "enoki-rolls", time: "20 min", p: 35,
+    photoNote: "Photo shows meat rolls with asparagus; yours have enoki inside.",
+    desc: "Thin-sliced beef rolled around enoki, browned, then simmered in gyudon sauce. Over rice.",
+    ing: ["150 g thin-sliced beef (6–8 slices)", "1 pack enoki (about 100–200 g), roots trimmed", "1 tsp cornstarch for dusting", "2 tbsp soy sauce", "1 tsp sugar", "¼ cup water + ¼ tsp dashi powder", "1 tsp neutral oil (not peanut)", "1 cup cooked white rice", "Scallions"],
+    steps: ["Lay a beef slice flat, put a small bundle of enoki at one end, roll up tight. Repeat.", "Dust rolls with cornstarch. Brown seam-side down in oil, 2 min, then turn until browned all over.", "Add soy sauce, sugar, water and dashi. Cover and simmer 5 min, turning the rolls to glaze.", "Cook until the enoki is soft and hot all the way through. Enoki has had Listeria recalls, so never eat it raw or barely warm.", "Serve over rice with the sauce and scallions."] },
   salmon:  { name: "Salmon, rice + edamame", img: "salmon", time: "15 min", p: 37,
     desc: "Salted pan-seared or air-fried salmon with rice and edamame.",
     ing: ["120 g salmon fillet (frozen is fine)", "Pinch of salt", "1 cup cooked white rice", "½ cup shelled edamame", "Soy sauce, a little"],
@@ -442,12 +459,12 @@ const MEALS = {
 
 /* Batch: Sunday cook; anything eaten Thursday or later is frozen on Sunday. */
 const MENU = {
-  mon: [["Breakfast", "eggs"], ["Lunch", "chicken", "fridge"], ["Snack", "shake"], ["Dinner", "gyudon", "fridge"]],
-  tue: [["Breakfast", "natto"], ["Lunch", "chicken", "fridge"], ["Snack", "shake"], ["Dinner", "mapo", "fridge"]],
-  wed: [["Breakfast", "eggs"], ["Lunch", "gyudon", "fridge"], ["Snack", "shake"], ["Dinner", "oyako"]],
-  thu: [["Breakfast", "natto"], ["Lunch", "mapo", "freezer"], ["Snack", "shake"], ["Dinner", "niku"]],
-  fri: [["Breakfast", "eggs"], ["Lunch", "chicken", "freezer"], ["Snack", "edamame"], ["Dinner", "mapo", "freezer"]],
-  sat: [["Breakfast", "natto"], ["Lunch", "nikuL"], ["Snack", "shake"], ["Dinner", "salmon"]],
+  mon: [["Breakfast", "burrito"], ["Lunch", "chicken", "fridge"], ["Snack", "shake"], ["Dinner", "gyudon", "fridge"]],
+  tue: [["Breakfast", "mcmuffin"], ["Lunch", "chicken", "fridge"], ["Snack", "shake"], ["Dinner", "mapo", "fridge"]],
+  wed: [["Breakfast", "frittata"], ["Lunch", "gyudon", "fridge"], ["Snack", "shake"], ["Dinner", "salmon"]],
+  thu: [["Breakfast", "burrito"], ["Lunch", "mapo", "freezer"], ["Snack", "shake"], ["Dinner", "niku"]],
+  fri: [["Breakfast", "frittata"], ["Lunch", "chicken", "freezer"], ["Snack", "edamame"], ["Dinner", "mapo", "freezer"]],
+  sat: [["Breakfast", "natto"], ["Lunch", "nikuL"], ["Snack", "shake"], ["Dinner", "enoki"]],
   sun: [["Breakfast", "eggs"], ["Lunch", "oyako"], ["Snack", "shake"], ["Dinner", "gyudon", "fresh"]]
 };
 const STORE_TAG = {
@@ -476,9 +493,9 @@ const PREP_RULES = [
 ];
 
 const GROCERY = [
-  ["Protein", ["Chicken breast or thigh — 700 g", "Thin-sliced beef — 800 g", "Lean ground beef — 300 g", "Eggs — 18", "Firm tofu — 700 g (2 blocks)", "Natto — 3 packs", "Salmon fillet — 1 (120 g)", "Protein powder, nut-safe — 6 servings"]],
+  ["Protein", ["Chicken breast or thigh — 700 g", "Thin-sliced beef — 950 g", "Lean ground beef — 300 g", "Eggs — 6", "Firm tofu — 700 g (2 blocks)", "Natto — 1 pack", "Salmon fillet — 1 (120 g)", "Protein powder, nut-safe — 6–10 servings"]],
   ["Rice + pantry", ["White rice — about 1.5 kg a week", "Soy sauce", "Dashi powder", "Chicken broth", "Doubanjiang (check allergens)", "Cornstarch", "Sugar", "Neutral oil (not peanut)"]],
-  ["Produce + frozen", ["Onions — 4", "Garlic — 1 head", "Ginger — 1 small knob", "Scallions — 1 bunch", "Frozen mixed vegetables — 1 bag (about 600 g)", "Shelled frozen edamame — 1 bag", "Bananas — 6", "Soy milk or lactose-free milk — 1 L"]]
+  ["Produce + frozen", ["Onions — 4", "Garlic — 1 head", "Ginger — 1 small knob", "Scallions — 1 bunch", "Frozen mixed vegetables — 1 bag (about 600 g)", "Shelled frozen edamame — 1 bag", "Enoki mushrooms — 1 pack", "Bananas — 6", "Soy milk or lactose-free milk — 1 L"]]
 ];
 
 const EVIDENCE = [
@@ -490,7 +507,7 @@ const EVIDENCE = [
   { t: "Split choice",
     e: "A 2024 meta-analysis (14 studies, 392 people) found split and full-body routines give similar strength and muscle gains when weekly volume matches.",
     r: "No split is magic. Pick the one you'll actually attend.",
-    d: "5-day push / pull / legs / push / pull. Upper body gets 2 sessions a week; legs get 1 full session (9 sets quads, 6 hamstrings), enough to grow but slower than the upper body.",
+    d: "5 days: pull, legs, push, then pull and push on the weekend, with Mon and Fri off. Upper body gets 2 sessions a week; legs get 1 full session (9 sets quads, 6 hamstrings), so they grow slower than the upper body.",
     src: [["Ramos-Campo et al., JSCR 2024", "https://journals.lww.com/nsca-jscr/fulltext/2024/07000/efficacy_of_split_versus_full_body_resistance.20.aspx"]] },
   { t: "Protein",
     e: "The ISSN position stand recommends 1.4–2.0 g/kg/day for people who train; a 2018 meta-analysis saw gains plateau around 1.6 g/kg (upper range about 2.2).",
@@ -529,12 +546,16 @@ const FOOD_CREDITS = [
   ["Chicken stir-fry", "Ginny", "CC BY-SA 2.0", "https://commons.wikimedia.org/wiki/File:Ginger_chicken_(3168342551).jpg"],
   ["Salmon set", "nesnad", "CC BY 3.0", "https://commons.wikimedia.org/wiki/File:Salt_grilled_salmon_teishoku_-_August_2014.jpg"],
   ["Edamame", "Fumikas Sagisavas", "CC0", "https://commons.wikimedia.org/wiki/File:Shelled_edamame_beans.jpg"],
-  ["Protein shake", "Sandstein", "CC BY 3.0", "https://commons.wikimedia.org/wiki/File:Protein_shake.jpg"]
+  ["Protein shake", "Sandstein", "CC BY 3.0", "https://commons.wikimedia.org/wiki/File:Protein_shake.jpg"],
+  ["Meat rolls", "RuinDig/Yuki Uchida", "CC BY 4.0", "https://commons.wikimedia.org/wiki/File:%E8%82%89%E5%B7%BB%E3%81%8D%E3%82%A2%E3%82%B9%E3%83%91%E3%83%A9%E3%82%AC%E3%82%B9---2024-06-21.jpg"],
+  ["McMuffin", "Evan-Amos", "public domain", "https://commons.wikimedia.org/wiki/File:McD-Saus-Egg-McMuffin.jpg"],
+  ["Frittata", "Andy Li", "CC0", "https://commons.wikimedia.org/wiki/File:Frittata_-_Bam%27s_Kitchen_2024-04-02.jpg"],
+  ["Breakfast burrito", "Cajsa Lilliehook", "CC BY-SA 2.0", "https://commons.wikimedia.org/wiki/File:Breakfast_burrito_(cropped).jpg"]
 ];
 
 /* ---------- state ---------- */
-/* v3: exercise order changed, so this week's set ticks from v2 no longer line up. */
-const STORE_KEY = "hosomacho_v3";
+/* v4: exercise order changed again, so older set ticks no longer line up. */
+const STORE_KEY = "hosomacho_v4";
 const GROC_KEY = "hosomacho_grocery_v2";
 /* Never reset: sets[date] = sets ticked that day (heatmap); lifts[exId] = [{d, w, r}] one entry per date. */
 const HIST_KEY = "hosomacho_history_v1";
@@ -554,6 +575,10 @@ let state = load(STORE_KEY, null);
 if (!state || state.week !== weekId) state = { week: weekId, gym: {}, food: {}, tab: state?.tab || "gym" };
 let hist = load(HIST_KEY, {});
 hist.sets ||= {}; hist.lifts ||= {};
+/* Sessions trained before the history log existed. */
+const PAST_SESSIONS = { "2026-10-27": 20 };
+for (const [d, n] of Object.entries(PAST_SESSIONS)) hist.sets[d] ??= n;
+save(HIST_KEY, hist);
 let groc = load(GROC_KEY, {});
 const todayKey = DAYS[(new Date().getDay() + 6) % 7].key;
 let day = todayKey;
@@ -619,7 +644,6 @@ function renderGymHead() {
     <div class="row">
       <span class="chip">${d.time}</span>
       ${total ? `<span class="chip ${count === total ? "done" : ""}" id="gymCount"><span class="mono">${count}/${total}</span> sets done</span>` : ""}
-      ${d.key === "sat" ? `<span class="chip accent">Skip if tired or busy</span>` : ""}
     </div>
     ${total ? `<div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div>` : ""}`;
 }
@@ -782,6 +806,7 @@ function renderFood() {
         </div>
         <p class="small">${esc(m.desc)}</p>
         ${m.makes ? `<p class="small muted">${esc(m.makes)}</p>` : ""}
+        ${m.photoNote ? `<p class="small muted">${esc(m.photoNote)}</p>` : ""}
         <details>
           <summary>Ingredients + steps</summary>
           <div class="in">
