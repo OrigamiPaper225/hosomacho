@@ -178,6 +178,33 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
 .ev p { font-size: .92rem; }
 .ev .k { font-weight: 700; color: var(--muted); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
 
+/* Weight log */
+.lift { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+.lift label { display: grid; gap: 2px; font-size: .74rem; font-weight: 700; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.lift input {
+  font: 700 1.05rem var(--f-mono); color: var(--ink); background: var(--surface); width: 100%; min-height: 44px;
+  border: 1px solid var(--line); border-radius: 10px; padding: 0 10px;
+}
+.lift p { grid-column: 1 / -1; }
+
+/* Heatmap */
+.heat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 10px; }
+.heat-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.heat-scroll { overflow-x: auto; display: grid; gap: 4px; }
+.heat-months, .heat-grid { display: grid; grid-template-columns: repeat(18, minmax(13px, 1fr)); gap: 3px; min-width: 290px; }
+.heat-months { font-size: .66rem; color: var(--muted); }
+.heat-months span { white-space: nowrap; }
+.heat-grid { grid-template-rows: repeat(7, auto); }
+.heat i, .heat-key i { display: block; aspect-ratio: 1; border-radius: 3px; background: var(--surface-2); border: 1px solid var(--line); }
+.heat i.l1 { background: color-mix(in srgb, var(--done) 30%, var(--surface-2)); border-color: transparent; }
+.heat i.l2 { background: color-mix(in srgb, var(--done) 55%, var(--surface-2)); border-color: transparent; }
+.heat i.l3 { background: color-mix(in srgb, var(--done) 80%, var(--surface-2)); border-color: transparent; }
+.heat i.l4 { background: var(--done); border-color: transparent; }
+.heat i.fut { opacity: .35; }
+.heat i.now { outline: 2px solid var(--accent); outline-offset: 0; }
+.heat-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; align-items: center; }
+.heat-key { display: inline-flex; gap: 3px; align-items: center; }
+.heat-key i { width: 11px; }
 footer { font-size: .78rem; color: var(--muted); display: grid; gap: 6px; }
 </style>
 
@@ -196,6 +223,7 @@ footer { font-size: .78rem; color: var(--muted); display: grid; gap: 6px; }
   <section class="panel" id="gym" role="tabpanel" aria-labelledby="tab-gym">
     <div class="dayhead" id="gymHead"></div>
     <div class="list" id="gymList"></div>
+    <section class="heat" id="heat" aria-label="Workout calendar"></section>
 
     <div class="note">
       <strong>Shoulder history: stop anything that hurts.</strong>
@@ -313,12 +341,12 @@ const EX = {
     cue: "Elbows pinned to your ribs. Only the forearms move. No body swing." },
   crunch:      { name: "Kneeling cable crunch", img: "cable-crunch", yt: "0KEP6A1deBE",
     cue: "Rope by your head, hips still. Curl your ribs toward your pelvis. Don't pull with your arms." },
-  csRow:       { name: "Chest-supported machine row", img: "leverage-iso-row", yt: "QpLTp2AJ_cI",
-    cue: "Chest stays on the pad. Pull elbows back toward your hips. Don't shrug." },
-  pulldown:    { name: "Lat pulldown (neutral or close grip)", img: "close-grip-front-lat-pulldown", yt: "jP7iqNMX2qI", short: true,
+  dbRow:       { name: "One-arm dumbbell row", img: "db-row", yt: "2AUbzsDCgaQ",
+    cue: "Knee and hand on a bench, back flat. Pull the dumbbell toward your hip, not your armpit. Don't twist." },
+  pulldown:    { name: "Lat pulldown (neutral or close grip)", img: "close-grip-front-lat-pulldown", yt: "oMJmAHRZXBk", short: true,
     cue: "Pull to the upper chest, elbows down. Never behind the neck. Only a slight lean back." },
-  revPec:      { name: "Reverse pec deck", img: "reverse-machine-flyes", yt: "E4Q12zRDwwU",
-    cue: "Light weight. Sweep arms back until in line with your body, not past it. Skip if painful.", sh: true },
+  facePull:    { name: "Cable face pull", img: "face-pull", yt: "7z65m-qWJrA",
+    cue: "Rope at chest-to-face height, light weight. Pull toward your eyes, hands apart, elbows no higher than shoulders. Skip if painful.", sh: true },
   curl:        { name: "Cable biceps curl", img: "standing-biceps-cable-curl", yt: "CrbTqNOlFgE", short: true,
     cue: "Upper arms by your sides, wrists straight, no rocking. Slow on the way down." },
   hammer:      { name: "Dumbbell hammer curl", img: "hammer-curls", yt: "cGCbs0PNvW0", short: true,
@@ -329,31 +357,39 @@ const EX = {
     cue: "Hips and lower back stay on the pad. Stop before your tailbone curls up." },
   legCurl:     { name: "Seated leg curl", img: "seated-leg-curl", yt: "7PE3MlvGAts", short: true,
     cue: "Line the machine pivot up with your knee. Smooth curl, slow return." },
-  hang:        { name: "Dead hang", img: "dead-hang", yt: "g0I7Jv3oqKw",
+  goblet:      { name: "Goblet squat", img: "goblet-squat", yt: "7-80HiXX1K8", short: true,
+    cue: "Hold one dumbbell at your chest, elbows down. Sit between your heels, chest up, knees track over toes." },
+  rdl:         { name: "Dumbbell Romanian deadlift", img: "db-rdl", yt: "hu3jRvTc_po", short: true,
+    cue: "Soft knees, push hips back, dumbbells slide down your thighs. Stop when hamstrings are tight, back stays flat." },
+  legExt:      { name: "Leg extension", img: "leg-extension", yt: "Tae3aeJe5Ks", short: true,
+    cue: "Knee lined up with the machine pivot. Squeeze at the top for 1 s, lower slowly." },
+  calf:        { name: "Standing calf raise", img: "calf-raise", yt: "yQZDGjL-xT4", short: true,
+    cue: "Full stretch at the bottom, pause 1 s, rise high onto the big toe. No bouncing." },
+  hang:        { name: "Dead hang", img: "dead-hang", yt: "g0I7Jv3oqKw", noLoad: true,
     cue: "Shoulder-width overhand grip, ribs down. Start with feet touching a box to take some weight. Step down if the shoulder aches.", sh: true },
-  deadBug:     { name: "Dead bug", img: "dead-bug", yt: "g_BYB0R-4Ws",
+  deadBug:     { name: "Dead bug", img: "dead-bug", yt: "g_BYB0R-4Ws", noLoad: true,
     cue: "Low back stays pressed down. Reach opposite arm and leg only as far as you stay braced." },
   pallof:      { name: "Cable Pallof press", img: "pallof-press", yt: "SY5lRzBPtM4",
     cue: "Stand side-on to the cable. Brace and press straight out. Don't let the torso twist." },
-  bike:        { name: "Stationary bike, easy", img: "bicycling-stationary", yt: "rlOOqDgDU3U",
+  bike:        { name: "Stationary bike, easy", img: "bicycling-stationary", yt: "rlOOqDgDU3U", noLoad: true,
     cue: "Conversational pace. Seat high enough that the knee is slightly bent at the bottom." }
 };
 
 const PUSH = [["chestPress", 3, "8–12"], ["cablePress", 2, "10–12"], ["lateral", 2, "12–15"], ["pressdown", 3, "10–15"], ["crunch", 3, "10–15"]];
 const DAYS = [
   { key: "mon", short: "Mon", name: "Monday",    title: "Push A + abs", sub: "Push", time: "50–60 min", ex: PUSH },
-  { key: "tue", short: "Tue", name: "Tuesday",   title: "Pull A + minimal legs", sub: "Pull", time: "55–60 min",
-    ex: [["csRow", 3, "8–12"], ["pulldown", 3, "8–12"], ["revPec", 2, "12–15"], ["curl", 3, "10–15"], ["legPress", 2, "8–12"], ["legCurl", 2, "10–15"], ["hang", 2, "20–30 s"], ["deadBug", 2, "8–10 / side"]] },
-  { key: "wed", short: "Wed", name: "Wednesday", title: "Recovery", sub: "Rest", time: "optional walk", ex: [] },
+  { key: "tue", short: "Tue", name: "Tuesday",   title: "Pull A", sub: "Pull", time: "45–55 min",
+    ex: [["dbRow", 3, "8–12 / side"], ["pulldown", 3, "8–12"], ["facePull", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["hang", 2, "20–30 s"], ["deadBug", 2, "8–10 / side"]] },
+  { key: "wed", short: "Wed", name: "Wednesday", title: "Legs", sub: "Legs", time: "45–55 min",
+    ex: [["legPress", 3, "8–12"], ["goblet", 3, "8–12"], ["rdl", 3, "8–10"], ["legCurl", 3, "10–15"], ["legExt", 2, "12–15"], ["calf", 3, "12–15"]] },
   { key: "thu", short: "Thu", name: "Thursday",  title: "Push B + abs", sub: "Push", time: "50–60 min", ex: PUSH },
-  { key: "fri", short: "Fri", name: "Friday",    title: "Pull B + minimal legs", sub: "Pull", time: "55–60 min",
-    ex: [["cableRow", 3, "8–12"], ["pulldown", 3, "8–12"], ["revPec", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["legPress", 2, "8–12"], ["legCurl", 2, "10–15"], ["hang", 2, "20–30 s"], ["pallof", 2, "10 / side"]] },
+  { key: "fri", short: "Fri", name: "Friday",    title: "Pull B", sub: "Pull", time: "45–55 min",
+    ex: [["cableRow", 3, "8–12"], ["pulldown", 3, "8–12"], ["facePull", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["hang", 2, "20–30 s"], ["pallof", 2, "10 / side"]] },
   { key: "sat", short: "Sat", name: "Saturday",  title: "Optional arms + easy cardio", sub: "Opt.", time: "20–30 min",
     ex: [["curl", 2, "12–15"], ["pressdown", 2, "12–15"], ["deadBug", 2, "8–10 / side"], ["bike", 1, "15–20 min"]] },
   { key: "sun", short: "Sun", name: "Sunday",    title: "Rest + meal prep", sub: "Rest", time: "full rest", ex: [] }
 ];
 const REST_TEXT = {
-  wed: ["20–30 min easy walk, or skip it.", "Do the after-session stretches if you feel stiff.", "Eat normally and hit your protein. Sleep 7–9 h."],
   sun: ["Full rest. A relaxed walk is fine.", "Do the Sunday batch prep in the Food tab.", "Missed a session this week? Let it go and start fresh Monday."]
 };
 
@@ -449,12 +485,12 @@ const EVIDENCE = [
   { t: "Volume and effort",
     e: "ACSM's 2026 position stand (an overview of 137 reviews) links about 10+ hard sets per muscle per week to muscle growth, with sets taken close to failure; absolute failure is not required.",
     r: "A beginner grows from modest volume if it's consistent and progressive.",
-    d: "Chest and back get 10–12 weekly sets. Every set stops 2–3 reps short of failure.",
+    d: "Chest and back get 10–16 weekly sets. Every set stops 2–3 reps short of failure.",
     src: [["ACSM 2026 position stand", "https://doi.org/10.1249/MSS.0000000000003897"], ["ACSM summary", "https://acsm.org/resistance-training-guidelines-update-2026/"]] },
   { t: "Split choice",
     e: "A 2024 meta-analysis (14 studies, 392 people) found split and full-body routines give similar strength and muscle gains when weekly volume matches.",
     r: "No split is magic. Pick the one you'll actually attend.",
-    d: "4-day push/pull, because you have 4–5 days and want minimal legs. Legs get 4 sets each a week, so expect little leg growth.",
+    d: "5-day push / pull / legs / push / pull. Upper body gets 2 sessions a week; legs get 1 full session (9 sets quads, 6 hamstrings), enough to grow but slower than the upper body.",
     src: [["Ramos-Campo et al., JSCR 2024", "https://journals.lww.com/nsca-jscr/fulltext/2024/07000/efficacy_of_split_versus_full_body_resistance.20.aspx"]] },
   { t: "Protein",
     e: "The ISSN position stand recommends 1.4–2.0 g/kg/day for people who train; a 2018 meta-analysis saw gains plateau around 1.6 g/kg (upper range about 2.2).",
@@ -497,24 +533,35 @@ const FOOD_CREDITS = [
 ];
 
 /* ---------- state ---------- */
-const STORE_KEY = "hosomacho_v2";
+/* v3: exercise order changed, so this week's set ticks from v2 no longer line up. */
+const STORE_KEY = "hosomacho_v3";
 const GROC_KEY = "hosomacho_grocery_v2";
+/* Never reset: sets[date] = sets ticked that day (heatmap); lifts[exId] = [{d, w, r}] one entry per date. */
+const HIST_KEY = "hosomacho_history_v1";
 function mondayOf(d) {
   const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
   return x;
 }
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const thisMonday = mondayOf(new Date());
-const weekId = thisMonday.toISOString().slice(0, 10);
+const weekId = ymd(thisMonday);
 function load(key, fallback) {
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
 }
 function save(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch {} }
 let state = load(STORE_KEY, null);
 if (!state || state.week !== weekId) state = { week: weekId, gym: {}, food: {}, tab: state?.tab || "gym" };
+let hist = load(HIST_KEY, {});
+hist.sets ||= {}; hist.lifts ||= {};
 let groc = load(GROC_KEY, {});
 const todayKey = DAYS[(new Date().getDay() + 6) % 7].key;
 let day = todayKey;
+function dateOf(key) {
+  const d = new Date(thisMonday);
+  d.setDate(d.getDate() + DAYS.findIndex(x => x.key === key));
+  return ymd(d);
+}
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -554,7 +601,7 @@ function renderGym() {
   const d = DAYS.find(x => x.key === day);
   const done = state.gym[day] || {};
   if (!d.ex.length) {
-    $("#gymList").innerHTML = `<div class="ex"><div class="body"><h3>${d.key === "wed" ? "Recovery day" : "Rest day"}</h3>
+    $("#gymList").innerHTML = `<div class="ex"><div class="body"><h3>Rest day</h3>
       <ul class="clean">${REST_TEXT[d.key].map(t => `<li>${t}</li>`).join("")}</ul></div></div>`;
     return;
   }
@@ -598,6 +645,7 @@ function renderGymList(d, done) {
         <div class="sets" role="group" aria-label="Sets for ${esc(x.name)}">
           ${Array.from({ length: sets }, (_, k) => `<button type="button" data-set="${i}.${k}" aria-pressed="${!!done[`${i}.${k}`]}">${sets === 1 ? "Done" : `Set ${k + 1}`}</button>`).join("")}
         </div>
+        ${x.noLoad ? "" : liftRow(id)}
         <div class="links"><a href="https://www.youtube.com/${x.short ? "shorts/" : "watch?v="}${x.yt}" target="_blank" rel="noopener">Open in YouTube ↗</a></div>
       </div>
     </article>`;
@@ -613,12 +661,81 @@ $("#gymList").addEventListener("click", e => {
     s.setAttribute("aria-pressed", m[s.dataset.set]);
     const card = s.closest(".ex");
     card.classList.toggle("complete", [...card.querySelectorAll("[data-set]")].every(b => b.getAttribute("aria-pressed") === "true"));
-    renderGymHead();
+    const n = Object.values(m).filter(Boolean).length;
+    if (n) hist.sets[dateOf(day)] = n; else delete hist.sets[dateOf(day)];
+    save(HIST_KEY, hist);
+    renderGymHead(); renderHeat();
     return;
   }
   const p = e.target.closest("[data-play]");
   if (p) playDemo(p);
 });
+/* ---------- weight log ---------- */
+const fmtShort = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
+const parseYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+function liftRow(id) {
+  const today = dateOf(day);
+  const log = hist.lifts[id] || [];
+  const cur = log.find(e => e.d === today) || {};
+  const prev = log.filter(e => e.d < today).at(-1);
+  const best = log.reduce((b, e) => (!b || e.w > b.w ? e : b), null);
+  return `
+    <div class="lift" data-lift="${id}">
+      <label for="w-${id}">Weight<input id="w-${id}" type="number" inputmode="decimal" min="0" step="0.5" placeholder="lb" value="${cur.w ?? ""}"></label>
+      <label for="r-${id}">Reps<input id="r-${id}" type="number" inputmode="numeric" min="0" step="1" placeholder="top set" value="${cur.r ?? ""}"></label>
+      <p class="small muted">${prev ? `Last: <b class="mono">${prev.w} lb × ${prev.r ?? "?"}</b> on ${fmtShort.format(parseYmd(prev.d))}` : "No previous log yet."}${best ? ` · Best: <span class="mono">${best.w} lb</span>` : ""}</p>
+    </div>`;
+}
+$("#gymList").addEventListener("change", e => {
+  const row = e.target.closest("[data-lift]"); if (!row) return;
+  const id = row.dataset.lift, d = dateOf(day);
+  const w = parseFloat(row.querySelector(`#w-${id}`).value);
+  const r = parseInt(row.querySelector(`#r-${id}`).value, 10);
+  const log = (hist.lifts[id] ||= []).filter(x => x.d !== d);
+  if (w > 0) log.push({ d, w, r: r > 0 ? r : null });
+  log.sort((a, b) => a.d < b.d ? -1 : 1);
+  hist.lifts[id] = log;
+  save(HIST_KEY, hist);
+});
+
+/* ---------- heatmap ---------- */
+const HEAT_WEEKS = 18;
+function renderHeat() {
+  const start = new Date(thisMonday); start.setDate(start.getDate() - (HEAT_WEEKS - 1) * 7);
+  const todayStr = ymd(new Date());
+  const level = n => !n ? 0 : n < 6 ? 1 : n < 12 ? 2 : n < 18 ? 3 : 4;
+  let cells = "", months = "", lastMonth = -1, lastLabel = -9, workouts = 0, weeksActive = 0;
+  for (let w = 0; w < HEAT_WEEKS; w++) {
+    const col = new Date(start); col.setDate(col.getDate() + w * 7);
+    if (col.getMonth() !== lastMonth) {
+      if (w - lastLabel >= 3) {
+        months += `<span style="grid-column:${w + 1}">${col.toLocaleString(undefined, { month: "short" })}</span>`;
+        lastLabel = w;
+      }
+      lastMonth = col.getMonth();
+    }
+    let active = false;
+    for (let k = 0; k < 7; k++) {
+      const d = new Date(col); d.setDate(d.getDate() + k);
+      const s = ymd(d), n = hist.sets[s] || 0;
+      if (n) { workouts++; active = true; }
+      cells += `<i style="grid-column:${w + 1};grid-row:${k + 1}" class="l${level(n)}${s > todayStr ? " fut" : ""}${s === todayStr ? " now" : ""}"
+        title="${fmtShort.format(d)}: ${n} sets"></i>`;
+    }
+    if (active) weeksActive++;
+  }
+  $("#heat").innerHTML = `
+    <div class="heat-head"><h3>Workout calendar</h3><span class="small muted">last ${HEAT_WEEKS} weeks</span></div>
+    <div class="heat-scroll">
+      <div class="heat-months">${months}</div>
+      <div class="heat-grid" role="img" aria-label="${workouts} workout days in the last ${HEAT_WEEKS} weeks">${cells}</div>
+    </div>
+    <div class="heat-foot small muted">
+      <span><b class="mono">${workouts}</b> workout days · <b class="mono">${weeksActive}</b> weeks trained</span>
+      <span class="heat-key">Less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> More</span>
+    </div>`;
+}
+
 /* Loads the embed only on tap: muted + looping so it behaves like a GIF between sets. */
 function playDemo(btn) {
   const x = EX[btn.dataset.play];
@@ -741,5 +858,5 @@ $("#credits").innerHTML = `
   Food photos via Wikimedia Commons: ${FOOD_CREDITS.map(([n, a, l, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(n)}</a> by ${esc(a)}, ${l}`).join("; ")}.</p>
   <p>Training and nutrition guide only. Not medical advice.</p>`;
 
-renderDays(); renderGym(); renderFood(); renderPrep(); renderGroc(); setTab(state.tab === "food" ? "food" : "gym");
+renderDays(); renderGym(); renderHeat(); renderFood(); renderPrep(); renderGroc(); setTab(state.tab === "food" ? "food" : "gym");
 </script>
