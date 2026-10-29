@@ -178,6 +178,17 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
 .ev p { font-size: .92rem; }
 .ev .k { font-weight: 700; color: var(--muted); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
 
+/* Warm-up / stretch picture cards */
+.moves { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.move { background: var(--surface-2); border-radius: 12px; overflow: hidden; display: grid; align-content: start; }
+.move img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; background: var(--line); }
+.move div { padding: 8px 10px 10px; display: grid; gap: 2px; }
+.move b { font-size: .9rem; line-height: 1.25; }
+.move .mono { color: var(--accent); font-size: .8rem; }
+.move p { font-size: .8rem; color: var(--muted); }
+.move .tagline { font-size: .7rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
+.opt { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); border: 1px solid var(--accent); border-radius: 99px; padding: 1px 8px; margin-left: 6px; vertical-align: 2px; }
+
 /* Weight log */
 .lift { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
 .lift label { display: grid; gap: 2px; font-size: .74rem; font-weight: 700; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
@@ -230,27 +241,18 @@ footer { font-size: .78rem; color: var(--muted); display: grid; gap: 6px; }
       <span>Use pain-free range and light loads. No overhead pressing, dips, upright rows or deep flyes for now. The dead hang puts the arm fully overhead: keep feet on a box at first and drop it if the shoulder aches. If pain, weakness or limited motion remains, get a physio to adjust exercises. This is a training plan, not rehab.</span>
     </div>
 
-    <details class="box">
-      <summary>Warm-up · before every session (5–8 min)</summary>
+    <details class="box" open>
+      <summary>Warm-up · before every session (8–10 min)</summary>
       <div class="in">
-        <ul class="clean">
-          <li>5 min easy bike or treadmill walk.</li>
-          <li>1–2 light ramp-up sets of the first exercise. These do not count as work sets.</li>
-          <li>Band external rotation, very light, 1–2 × 12. Only if pain-free.</li>
-        </ul>
+        <p class="small">5 min easy bike or treadmill first. Then these, in order. Finish with 1–2 light ramp-up sets of your first exercise.</p>
+        <div class="moves" id="warmup"></div>
       </div>
     </details>
     <details class="box">
-      <summary>Stretches · after every session (4 min)</summary>
+      <summary>Stretches · after every session (5 min)</summary>
       <div class="in">
-        <ul class="clean">
-          <li>Chest doorway stretch, elbow below shoulder — 2 × 20–30 s. Gentle; skip if the shoulder pinches.</li>
-          <li>Cross-body shoulder stretch — 2 × 20–30 s per side, only if comfortable.</li>
-          <li>Lat stretch on a rack, hips back — 2 × 20–30 s per side.</li>
-          <li>Hamstring stretch — 2 × 20–30 s per side.</li>
-          <li>Hip-flexor stretch (half kneel) — 2 × 20–30 s per side.</li>
-        </ul>
-        <p class="small muted">Never force an end range on the injured shoulder.</p>
+        <div class="moves" id="cooldown"></div>
+        <p class="small muted">Hold gently. Never force an end range on the injured shoulder.</p>
       </div>
     </details>
     <details class="box">
@@ -339,8 +341,10 @@ const EX = {
     cue: "Pulley at chest height, slight elbow bend. Sweep the handle across to the middle of your chest. Stop when your hand is in line with your body; no deep stretch behind it.", sh: true },
   lateral:     { name: "Cable lateral raise", img: "cable-lateral", yt: "qghfvzcoS2I",
     cue: "Low pulley, cable crossing in front of you. Very light. Raise slightly forward of your side, no higher than shoulder height.", sh: true },
-  overhead:    { name: "Cable overhead triceps extension", img: "overhead-triceps", yt: "NTk0Igxqcsk", short: true,
-    cue: "Face away from a high pulley, lean forward, elbows by your ears. Straighten the arms, then let the hands come back slowly. If the shoulder pinches overhead, lean further forward so the arms point more ahead than up.", sh: true },
+  bench:       { name: "Barbell bench press", img: "bench-press", yt: "0cXAp6WhSj4", short: true, optional: true,
+    cue: "Eyes under the bar, shoulder blades pinched, feet planted. Lower to mid-chest with elbows about 45° from your body. Use safety pins or a spotter. Skip it on days the shoulder feels off; the machine press covers chest.", sh: true },
+  overhead:    { name: "Cable overhead triceps extension", img: "overhead-triceps", yt: "mRozZKkGIfg",
+    cue: "Rope on the low pulley. Face away, step forward, rope behind your head, elbows by your ears and pointing forward. Straighten the arms overhead, lower slowly. If the shoulder pinches, lean further forward.", sh: true },
   crunch:      { name: "Kneeling cable crunch", img: "cable-crunch", yt: "0KEP6A1deBE",
     cue: "Rope by your head, hips still. Curl your ribs toward your pelvis. Don't pull with your arms." },
   singleRow:   { name: "Standing single-arm cable row", img: "cable-row-1arm", yt: "pBbbR6ypIEs",
@@ -375,7 +379,23 @@ const EX = {
     cue: "Stand side-on to the cable. Brace and press straight out. Don't let the torso twist." }
 };
 
-const PUSH = [["chestPress", 3, "8–12"], ["cableFly", 2, "12–15 / side"], ["lateral", 3, "12–15 / side"], ["overhead", 3, "10–15"], ["crunch", 3, "10–15"]];
+const WARMUP = [
+  ["arm-circles", "Arm circles", "10 forward + 10 back", "Small to medium circles. Stay below shoulder height if the shoulder is sore."],
+  ["chest-opener", "Arm swings / chest opener", "10 reps", "Hug yourself, then swing the arms open to the sides. Easy pace."],
+  ["band-pull-apart", "Band pull-apart", "2 × 15", "Light band, arms at chest height. Pull the band apart by squeezing the shoulder blades."],
+  ["band-external-rotation", "Band external rotation", "1–2 × 12 / side", "Elbow pinned to your side, rotate the forearm out. Very light; only if pain-free."],
+  ["cat-cow", "Cat-cow", "8 slow reps", "On hands and knees, round the back up, then let it sag. Moves the whole spine."],
+  ["hip-circles", "Hip circles", "8 / side", "Leg day: lift a knee and draw big circles with it. Hold something for balance.", "Leg day"],
+  ["bodyweight-squat", "Bodyweight squat", "10 reps", "Leg day: slow, full depth you can control, heels down.", "Leg day"]
+];
+const COOLDOWN = [
+  ["cross-body", "Cross-body shoulder stretch", "2 × 20–30 s / side", "Pull the arm across the chest at shoulder height or lower. Only if comfortable."],
+  ["lat-wall", "Lat stretch on a wall", "2 × 20–30 s / side", "Forearm on the wall, sink the hips back and down until you feel the side of your back."],
+  ["forearm", "Kneeling forearm stretch", "2 × 20 s", "On all fours, fingers pointing back toward your knees. Lean back gently. Pairs with the wrist work."],
+  ["hamstring-calf", "Hamstring + calf stretch", "2 × 20–30 s / side", "Leg straight, toes up, hinge forward with a flat back."],
+  ["hip-flexor", "Half-kneeling hip-flexor stretch", "2 × 20–30 s / side", "Squeeze the back glute and shift forward until the front of the hip stretches."]
+];
+const PUSH = [["bench", 3, "6–10"], ["chestPress", 3, "8–12"], ["cableFly", 2, "12–15 / side"], ["lateral", 3, "12–15 / side"], ["overhead", 3, "10–15"], ["crunch", 3, "10–15"]];
 const PULL = core => [["singleRow", 3, "10–12 / side"], ["pulldown", 3, "8–12"], ["facePull", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["wristExt", 2, "15–20"], ["hang", 2, "20–30 s"], core];
 /* Weekdays carry the rest days; the weekend has more time for the gym. */
 const DAYS = [
@@ -635,8 +655,10 @@ function renderGym() {
 function renderGymHead() {
   const d = DAYS.find(x => x.key === day);
   const done = state.gym[day] || {};
-  const total = d.ex.reduce((n, [, s]) => n + s, 0);
-  const count = d.ex.reduce((n, [, s], i) => n + Array.from({ length: s }, (_, k) => done[`${i}.${k}`]).filter(Boolean).length, 0);
+  /* Optional lifts don't count toward the day's total, so skipping them still completes the day. */
+  const req = d.ex.map((e, i) => [e, i]).filter(([[id]]) => !EX[id].optional);
+  const total = req.reduce((n, [[, s]]) => n + s, 0);
+  const count = req.reduce((n, [[, s], i]) => n + Array.from({ length: s }, (_, k) => done[`${i}.${k}`]).filter(Boolean).length, 0);
   const pct = total ? Math.round(count / total * 100) : 0;
   $("#gymHead").innerHTML = `
     <span class="label">${d.name}${d.key === todayKey ? " · today" : ""}</span>
@@ -661,7 +683,7 @@ function renderGymList(d, done) {
       </div>
       <div class="body">
         <div class="top">
-          <div><span class="num">${String(i + 1).padStart(2, "0")}</span><h3>${esc(x.name)}</h3></div>
+          <div><span class="num">${String(i + 1).padStart(2, "0")}</span><h3>${esc(x.name)}${x.optional ? `<span class="opt">Optional</span>` : ""}</h3></div>
           <span class="sr">${sets} × ${reps}</span>
         </div>
         <p class="cue">${esc(x.cue)}</p>
@@ -869,6 +891,13 @@ $("#grocReset").addEventListener("click", e => {
 });
 
 /* ---------- static sections ---------- */
+const moveCards = list => list.map(([img, name, dose, how, tag]) => `
+  <div class="move">
+    <img src="img/stretch/${img}.webp" alt="${esc(name)}" loading="lazy" decoding="async">
+    <div>${tag ? `<span class="tagline">${tag}</span>` : ""}<b>${esc(name)}</b><span class="mono">${dose}</span><p>${esc(how)}</p></div>
+  </div>`).join("");
+$("#warmup").innerHTML = moveCards(WARMUP);
+$("#cooldown").innerHTML = moveCards(COOLDOWN);
 $("#evidence").innerHTML = EVIDENCE.map(x => `
   <div class="ev">
     <h3>${x.t}</h3>
@@ -879,7 +908,7 @@ $("#evidence").innerHTML = EVIDENCE.map(x => `
   </div>`).join("");
 $("#credits").innerHTML = `
   <p>Checkmarks save in this browser only and reset each Monday. Grocery checks stay until you clear them.</p>
-  <p>Demo videos are embedded from YouTube and belong to their creators. Cover photos: <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener">free-exercise-db</a> (public domain).
+  <p>Demo videos are embedded from YouTube and belong to their creators. Exercise and stretch photos: <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener">free-exercise-db</a> (public domain).
   Food photos via Wikimedia Commons: ${FOOD_CREDITS.map(([n, a, l, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(n)}</a> by ${esc(a)}, ${l}`).join("; ")}.</p>
   <p>Training and nutrition guide only. Not medical advice.</p>`;
 
