@@ -119,19 +119,16 @@ ul.clean { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
 /* Exercise card */
 .ex { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: grid; }
 .ex.complete { border-color: var(--done); }
-.media { position: relative; aspect-ratio: 850 / 567; max-width: 100%; background: #000; display: block; width: 100%; }
-.media.playing { aspect-ratio: 16 / 9; }
-.media.playing.short { aspect-ratio: 9 / 16; max-height: 72vh; margin-inline: auto; }
-.media iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.media .play { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; padding: 0; background: transparent; cursor: pointer; display: block; }
+.media { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: #000; display: block; width: 100%; overflow: hidden; }
+.media.short { aspect-ratio: 9 / 16; max-height: 62vh; margin-inline: auto; }
+.media iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; opacity: 0; transition: opacity .3s; }
+.media.live iframe { opacity: 1; }
+.media.manual iframe { opacity: 1; pointer-events: auto; }
+.media .shield { position: absolute; inset: 0; border: 0; padding: 0; background: transparent; }
+.media .shield span { display: none; }
+.media.stuck .shield { cursor: pointer; display: grid; place-items: center; }
+.media.stuck .shield span { display: block; background: rgba(10,12,24,.8); color: #fff; font: 700 .95rem var(--f-body); padding: 12px 20px; border-radius: 99px; }
 .media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.media .tag {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  background: rgba(10,12,24,.78); color: #fff; font: 700 .95rem var(--f-body);
-  padding: 12px 20px; border-radius: 99px; display: flex; gap: 10px; align-items: center; white-space: nowrap;
-}
-.media .tag::before { content: ""; border-style: solid; border-width: 8px 0 8px 13px; border-color: transparent transparent transparent var(--accent); }
-.media .play:hover .tag, .media .play:focus-visible .tag { background: rgba(10,12,24,.92); }
 .media .fallback, .photo .fallback { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 16px; color: var(--muted); font-size: .9rem; }
 .ex .body { padding: 14px 16px 16px; display: grid; gap: 10px; }
 .ex .top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
@@ -337,45 +334,41 @@ footer { font-size: .78rem; color: var(--muted); display: grid; gap: 6px; }
 const EX = {
   chestPress:  { name: "Machine chest press", img: "leverage-chest-press", yt: "VHIlmOPMWWs", short: true,
     cue: "Handles at mid-chest, back flat on the pad. Lower only as far as the shoulder feels fine.", sh: true },
-  cableFly:    { name: "Single-arm cable chest fly", img: "cable-fly", yt: "hYg9KkHk1lE",
+  cableFly:    { name: "Single-arm cable chest fly", img: "cable-fly", yt: "y4RJDSOBEl8", short: true,
     cue: "Pulley at chest height, slight elbow bend. Sweep the handle across to the middle of your chest. Stop when your hand is in line with your body; no deep stretch behind it.", sh: true },
-  lateral:     { name: "Cable lateral raise", img: "cable-lateral", yt: "qghfvzcoS2I",
+  lateral:     { name: "Cable lateral raise", img: "cable-lateral", yt: "f_OGBg2KxgY", short: true,
     cue: "Low pulley, cable crossing in front of you. Very light. Raise slightly forward of your side, no higher than shoulder height.", sh: true },
-  bench:       { name: "Barbell bench press", img: "bench-press", yt: "0cXAp6WhSj4", short: true, optional: true,
-    cue: "Eyes under the bar, shoulder blades pinched, feet planted. Lower to mid-chest with elbows about 45° from your body. Use safety pins or a spotter. Skip it on days the shoulder feels off; the machine press covers chest.", sh: true },
-  overhead:    { name: "Cable overhead triceps extension", img: "overhead-triceps", yt: "mRozZKkGIfg",
+  overhead:    { name: "Cable overhead triceps extension", img: "overhead-triceps", yt: "jsQnhVg47rA", short: true,
     cue: "Rope on the low pulley. Face away, step forward, rope behind your head, elbows by your ears and pointing forward. Straighten the arms overhead, lower slowly. If the shoulder pinches, lean further forward.", sh: true },
-  crunch:      { name: "Kneeling cable crunch", img: "cable-crunch", yt: "0KEP6A1deBE",
-    cue: "Rope by your head, hips still. Curl your ribs toward your pelvis. Don't pull with your arms." },
-  singleRow:   { name: "Standing single-arm cable row", img: "cable-row-1arm", yt: "pBbbR6ypIEs",
-    cue: "Staggered stance, free hand on the machine. Let the shoulder reach forward, then pull the handle to your hip. Torso stays still." },
-  pulldown:    { name: "Lat pulldown (neutral or close grip)", img: "close-grip-front-lat-pulldown", yt: "oMJmAHRZXBk", short: true,
+  abMachine:   { name: "Seated ab crunch machine", img: "ab-machine", yt: "mnRhbUB3Fjs", short: true,
+    cue: "Seated, so no weight on your knees. Curl your ribs down toward your hips, pause, return slowly. Don't yank with the arms. No machine: lying crunch with a plate on your chest." },
+  latRow:      { name: "Single-arm cable lat row", img: "cable-row-1arm", yt: "yIvvQc2Z6uM", short: true,
+    cue: "Handle at waist height or lower. Elbow stays tucked to your side and drives back toward your hip. Lats do the work, not the upper back. Let the shoulder reach forward at the start." },
+  pulldown:    { name: "Lat pulldown (neutral or close grip)", img: "close-grip-front-lat-pulldown", yt: "5s6KGLTMgoI", short: true,
     cue: "Pull to the upper chest, elbows down. Never behind the neck. Only a slight lean back." },
-  facePull:    { name: "Cable face pull", img: "face-pull", yt: "7z65m-qWJrA",
+  facePull:    { name: "Cable face pull", img: "face-pull", yt: "sHSY0Ao8QHs", short: true,
     cue: "Rope at chest-to-face height, light weight. Pull toward your eyes, hands apart, elbows no higher than shoulders. Skip if painful.", sh: true },
   curl:        { name: "Cable biceps curl", img: "standing-biceps-cable-curl", yt: "CrbTqNOlFgE", short: true,
     cue: "Upper arms by your sides, wrists straight, no rocking. Slow on the way down." },
-  hammer:      { name: "Cable rope hammer curl", img: "cable-hammer", yt: "vsarApmqJmo",
+  hammer:      { name: "Cable rope hammer curl", img: "cable-hammer", yt: "itEITvseq9g",
     cue: "Rope on the low pulley, thumbs up. Elbows pinned to your sides, curl, then lower for a 2-second count." },
   wristExt:    { name: "Dumbbell wrist extension", img: "wrist-ext", yt: "N284Q08Ne2g", short: true,
     cue: "Forearm on your thigh or a bench, palm down, wrist past the edge. Lift the back of the hand up, lower slowly. Light weight, full range." },
-  legPress:    { name: "Leg press", img: "leg-press", yt: "26DciWnfbRg", short: true,
-    cue: "Hips and lower back stay on the pad. Stop before your tailbone curls up." },
+  boxSquat:    { name: "Barbell box squat", img: "box-squat", yt: "1SgHKc5tImQ",
+    cue: "Bar on upper back in a rack with safety pins set. Sit back onto a box at or a little above knee height, touch it lightly without relaxing, stand up. The box caps depth, which keeps knee load down. Raise the box if your knees ache." },
   legCurl:     { name: "Seated leg curl", img: "seated-leg-curl", yt: "7PE3MlvGAts", short: true,
     cue: "Line the machine pivot up with your knee. Smooth curl, slow return." },
-  goblet:      { name: "Goblet squat", img: "goblet-squat", yt: "7-80HiXX1K8", short: true,
-    cue: "Hold one dumbbell at your chest, elbows down. Sit between your heels, chest up, knees track over toes." },
-  rdl:         { name: "Dumbbell Romanian deadlift", img: "db-rdl", yt: "hu3jRvTc_po", short: true,
-    cue: "Soft knees, push hips back, dumbbells slide down your thighs. Stop when hamstrings are tight, back stays flat." },
+  bbRdl:       { name: "Barbell Romanian deadlift", img: "bb-rdl", yt: "lDoRchHPsaI", short: true,
+    cue: "Bar starts at the hips. Soft knees, push hips back, bar slides down your thighs. Stop when the hamstrings are tight (around the knees for most people), not as low as possible. Back stays flat." },
   legExt:      { name: "Leg extension", img: "leg-extension", yt: "Tae3aeJe5Ks", short: true,
-    cue: "Knee lined up with the machine pivot. Squeeze at the top for 1 s, lower slowly." },
-  calf:        { name: "Standing calf raise", img: "calf-raise", yt: "yQZDGjL-xT4", short: true,
-    cue: "Full stretch at the bottom, pause 1 s, rise high onto the big toe. No bouncing." },
-  hang:        { name: "Dead hang", img: "dead-hang", yt: "g0I7Jv3oqKw", noLoad: true,
+    cue: "Knee lined up with the machine pivot. Squeeze at the top for 1 s, lower slowly. Weak knees: lighter weight, slow reps, and only the range that feels fine." },
+  calfPress:   { name: "Calf raise on the leg press", img: "calf-press", yt: "DqT1h2_hQJ4", short: true,
+    cue: "Balls of the feet on the bottom edge of the platform, knees straight but not locked. Lower the heels for a deep stretch, pause 1 s, push up high. Keep the safety catches on." },
+  hang:        { name: "Dead hang", img: "dead-hang", yt: "bDSqVe4b9pA", short: true, noLoad: true,
     cue: "Shoulder-width overhand grip, ribs down. Start with feet touching a box to take some weight. Step down if the shoulder aches.", sh: true },
-  deadBug:     { name: "Dead bug", img: "dead-bug", yt: "g_BYB0R-4Ws", noLoad: true,
+  deadBug:     { name: "Dead bug", img: "dead-bug", yt: "XcYtWYMz39w", short: true, noLoad: true,
     cue: "Low back stays pressed down. Reach opposite arm and leg only as far as you stay braced." },
-  pallof:      { name: "Cable Pallof press", img: "pallof-press", yt: "SY5lRzBPtM4",
+  pallof:      { name: "Cable Pallof press", img: "pallof-press", yt: "6q2n6pxG7jE", short: true,
     cue: "Stand side-on to the cable. Brace and press straight out. Don't let the torso twist." }
 };
 
@@ -395,14 +388,14 @@ const COOLDOWN = [
   ["hamstring-calf", "Hamstring + calf stretch", "2 × 20–30 s / side", "Leg straight, toes up, hinge forward with a flat back."],
   ["hip-flexor", "Half-kneeling hip-flexor stretch", "2 × 20–30 s / side", "Squeeze the back glute and shift forward until the front of the hip stretches."]
 ];
-const PUSH = [["bench", 3, "6–10"], ["chestPress", 3, "8–12"], ["cableFly", 2, "12–15 / side"], ["lateral", 3, "12–15 / side"], ["overhead", 3, "10–15"], ["crunch", 3, "10–15"]];
-const PULL = core => [["singleRow", 3, "10–12 / side"], ["pulldown", 3, "8–12"], ["facePull", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["wristExt", 2, "15–20"], ["hang", 2, "20–30 s"], core];
+const PUSH = [["chestPress", 3, "8–12"], ["cableFly", 2, "12–15 / side"], ["lateral", 3, "12–15 / side"], ["overhead", 3, "10–15"], ["abMachine", 3, "10–15"]];
+const PULL = core => [["latRow", 3, "10–12 / side"], ["pulldown", 3, "8–12"], ["facePull", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["wristExt", 2, "15–20"], ["hang", 2, "20–30 s"], core];
 /* Weekdays carry the rest days; the weekend has more time for the gym. */
 const DAYS = [
   { key: "mon", short: "Mon", name: "Monday",    title: "Rest", sub: "Rest", time: "full rest", ex: [] },
   { key: "tue", short: "Tue", name: "Tuesday",   title: "Pull A", sub: "Pull", time: "50–60 min", ex: PULL(["deadBug", 2, "8–10 / side"]) },
   { key: "wed", short: "Wed", name: "Wednesday", title: "Legs", sub: "Legs", time: "45–55 min",
-    ex: [["legPress", 3, "8–12"], ["goblet", 3, "8–12"], ["rdl", 3, "8–10"], ["legCurl", 3, "10–15"], ["legExt", 2, "12–15"], ["calf", 3, "12–15"]] },
+    ex: [["boxSquat", 3, "6–10"], ["bbRdl", 3, "8–10"], ["legCurl", 3, "10–15"], ["legExt", 2, "12–15"], ["calfPress", 3, "12–20"]] },
   { key: "thu", short: "Thu", name: "Thursday",  title: "Push A + abs", sub: "Push", time: "50–60 min", ex: PUSH },
   { key: "fri", short: "Fri", name: "Friday",    title: "Rest", sub: "Rest", time: "full rest", ex: [] },
   { key: "sat", short: "Sat", name: "Saturday",  title: "Pull B", sub: "Pull", time: "50–60 min", ex: PULL(["pallof", 2, "10 / side"]) },
@@ -539,10 +532,20 @@ const EVIDENCE = [
     r: "Cheap, safe for healthy adults, small but real benefit.",
     d: "3 g a day. Start it separately from protein powder to check your gut.",
     src: [["ISSN creatine stand", "https://pmc.ncbi.nlm.nih.gov/articles/PMC5469049/"], ["NIH ODS fact sheet", "https://ods.od.nih.gov/factsheets/ExerciseAndAthleticPerformance-HealthProfessional/"]] },
+  { t: "Machine press vs bench",
+    e: "A 2023 meta-analysis of 13 trials found machines and free weights build the same amount of muscle. Strength gains were specific: you get better at whichever one you train.",
+    r: "Your goal is size, not a bench-press number. The machine is also easier on an old shoulder and needs no spotter.",
+    d: "Machine chest press 3 sets + single-arm cable fly 2 sets, twice a week = 10 chest sets. No bench needed.",
+    src: [["Haugen et al., BMC Sports Sci Med Rehabil 2023", "https://pmc.ncbi.nlm.nih.gov/articles/PMC10426227/"]] },
+  { t: "Weak knees",
+    e: "Knee joint forces rise as the knee bends and peak near the deepest point of a squat. Squats load the knee more than the leg press at the same depth.",
+    r: "Swapping machines doesn't fix sore knees; controlling depth does. Hip-hinge moves (RDL, leg curl) load the knee very little.",
+    d: "Box squat to a box at or above knee height, barbell RDL for the back of the legs, calf raises with straight knees. If knees still hurt, see a physio.",
+    src: [["Escamilla 2001, Med Sci Sports Exerc", "https://pubmed.ncbi.nlm.nih.gov/11194098/"]] },
   { t: "Abs",
     e: "In a 6-week trial, people doing ab exercises 5 days a week lost no more belly fat than a group that didn't. Spot reduction doesn't work.",
     r: "Visible abs need trained ab muscle plus low enough body fat to see it.",
-    d: "Weighted cable crunches 2× a week build the abs. Training and protein slowly cut the fat over them. Dead bug and Pallof train bracing. Dead hangs build grip and stretch the lats; they add little muscle.",
+    d: "Weighted machine crunches 2× a week build the abs (seated, so nothing presses on your knees). Training and protein slowly cut the fat over them. Dead bug and Pallof train bracing. Dead hangs build grip and stretch the lats; they add little muscle.",
     src: [["Vispute et al., JSCR 2011", "https://pubmed.ncbi.nlm.nih.gov/21804427/"]] },
   { t: "Shoulder",
     e: "AAOS advises not exercising through pain and getting clinician guidance after shoulder injury.",
@@ -575,7 +578,7 @@ const FOOD_CREDITS = [
 
 /* ---------- state ---------- */
 /* v4: exercise order changed again, so older set ticks no longer line up. */
-const STORE_KEY = "hosomacho_v4";
+const STORE_KEY = "hosomacho_v5";
 const GROC_KEY = "hosomacho_grocery_v2";
 /* Never reset: sets[date] = sets ticked that day (heatmap); lifts[exId] = [{d, w, r}] one entry per date. */
 const HIST_KEY = "hosomacho_history_v1";
@@ -675,11 +678,8 @@ function renderGymList(d, done) {
     const allDone = Array.from({ length: sets }, (_, k) => done[`${i}.${k}`]).every(Boolean);
     return `
     <article class="ex ${allDone ? "complete" : ""}" data-i="${i}">
-      <div class="media${x.short ? " short" : ""}">
-        <button class="play" type="button" data-play="${id}" aria-label="Play ${esc(x.name)} demo video">
-          <img src="img/ex/${x.img}-0.webp" alt="${esc(x.name)}" loading="lazy" decoding="async">
-          <span class="tag">Play demo</span>
-        </button>
+      <div class="media${x.short ? " short" : ""}" data-reel="${id}">
+        <img src="img/ex/${x.img}-0.webp" alt="${esc(x.name)}" loading="lazy" decoding="async">
       </div>
       <div class="body">
         <div class="top">
@@ -692,11 +692,11 @@ function renderGymList(d, done) {
           ${Array.from({ length: sets }, (_, k) => `<button type="button" data-set="${i}.${k}" aria-pressed="${!!done[`${i}.${k}`]}">${sets === 1 ? "Done" : `Set ${k + 1}`}</button>`).join("")}
         </div>
         ${x.noLoad ? "" : liftRow(id)}
-        <div class="links"><a href="https://www.youtube.com/${x.short ? "shorts/" : "watch?v="}${x.yt}" target="_blank" rel="noopener">Open in YouTube ↗</a></div>
+        <div class="links"><a href="https://www.youtube-nocookie.com/embed/${x.yt}?autoplay=1&rel=0" target="_blank" rel="noopener noreferrer">Watch with sound (private) ↗</a></div>
       </div>
     </article>`;
   }).join("");
-  $("#gymList").querySelectorAll("[data-play]").forEach(b => imgFail(b.querySelector("img"), EX[b.dataset.play].name));
+  $("#gymList").querySelectorAll("[data-reel]").forEach(m => { imgFail(m.querySelector("img"), EX[m.dataset.reel].name); reelObserver.observe(m); });
 }
 $("#gymList").addEventListener("click", e => {
   const s = e.target.closest("[data-set]");
@@ -713,8 +713,6 @@ $("#gymList").addEventListener("click", e => {
     renderGymHead(); renderHeat();
     return;
   }
-  const p = e.target.closest("[data-play]");
-  if (p) playDemo(p);
 });
 /* ---------- weight log ---------- */
 const fmtShort = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
@@ -782,15 +780,43 @@ function renderHeat() {
     </div>`;
 }
 
-/* Loads the embed only on tap: muted + looping so it behaves like a GIF between sets. */
-function playDemo(btn) {
-  const x = EX[btn.dataset.play];
-  const box = btn.parentElement;
-  const q = new URLSearchParams({ autoplay: 1, mute: 1, loop: 1, playlist: x.yt, playsinline: 1, rel: 0 });
-  box.classList.add("playing");
-  box.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${x.yt}?${q}" title="${esc(x.name)} demo"
-    allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
-}
+/* Reels play muted and looping like a GIF. Only cards near the screen hold a player, so a long list
+   doesn't run 8 videos at once; a card that scrolls far away drops its player and shows the photo again.
+   The photo stays on top until YouTube reports "playing"; if autoplay is blocked (e.g. iPhone Low Power
+   Mode) a tap-to-play button appears instead of a black box. */
+const reelObserver = new IntersectionObserver(entries => {
+  for (const { target: box, isIntersecting } of entries) {
+    const frame = box.querySelector("iframe");
+    if (isIntersecting && !frame) {
+      const x = EX[box.dataset.reel];
+      const q = new URLSearchParams({ autoplay: 1, mute: 1, loop: 1, playlist: x.yt, playsinline: 1, controls: 0, rel: 0,
+        disablekb: 1, enablejsapi: 1, origin: location.origin });
+      box.insertAdjacentHTML("beforeend", `<iframe src="https://www.youtube-nocookie.com/embed/${x.yt}?${q}" title="${esc(x.name)} demo"
+        allow="autoplay; encrypted-media" tabindex="-1"></iframe><button class="shield" type="button" tabindex="-1"><span>▶ Tap to play</span></button>`);
+      const f = box.querySelector("iframe");
+      f.addEventListener("load", () => f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: x.yt, channel: "widget" }), "*"));
+      box._stuck = setTimeout(() => { if (!box.classList.contains("live")) box.classList.add("stuck"); }, 5000);
+    } else if (!isIntersecting && frame) {
+      clearTimeout(box._stuck);
+      frame.remove(); box.querySelector(".shield")?.remove();
+      box.classList.remove("live", "stuck", "manual");
+    }
+  }
+}, { rootMargin: "300px 0px" });
+window.addEventListener("message", e => {
+  if (!/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin)) return;
+  let m; try { m = JSON.parse(e.data); } catch { return; }
+  const state = m.event === "onStateChange" ? m.info : m.info?.playerState;
+  if (state !== 1) return;
+  const f = [...document.querySelectorAll("[data-reel] iframe")].find(x => x.contentWindow === e.source);
+  f?.parentElement.classList.add("live");
+  f?.parentElement.classList.remove("stuck");
+});
+$("#gymList").addEventListener("click", e => {
+  const sh = e.target.closest(".media.stuck .shield"); if (!sh) return;
+  const box = sh.parentElement;
+  box.classList.remove("stuck"); box.classList.add("manual"); sh.remove();
+});
 
 /* ---------- food ---------- */
 function renderFood() {
