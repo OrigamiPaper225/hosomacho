@@ -77,13 +77,18 @@ header {
 .head-in { max-width: 760px; margin: 0 auto; width: 100%; display: grid; gap: 10px; }
 .brand { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .brand h1 { font-family: var(--f-display); font-weight: 400; font-size: 1.5rem; letter-spacing: .02em; }
-.brand span { font-size: .8rem; color: var(--muted); }
+.brand #weekLabel { font-size: .8rem; color: var(--muted); }
 .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
 .seg button {
   font: inherit; font-weight: 700; border: 0; border-radius: 999px; padding: 10px 0; min-height: 44px;
   background: transparent; color: var(--muted); cursor: pointer;
 }
 .seg button[aria-selected="true"] { background: var(--accent); color: var(--on-accent); }
+.weeknav { display: flex; align-items: center; gap: 4px; }
+.weeknav button { font: inherit; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; min-width: 36px; min-height: 36px; cursor: pointer; }
+.weeknav button.now { padding: 0 10px; font-size: .75rem; color: var(--muted); }
+.weeknav button[hidden] { display: none; }
+.sess { font: inherit; font-size: .85rem; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 4px 8px; min-height: 36px; }
 .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .days button {
   font: inherit; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
@@ -222,7 +227,7 @@ footer { font-size: .78rem; color: var(--muted); display: grid; gap: 6px; }
 
 <header>
   <div class="head-in">
-    <div class="brand"><h1>細マッチョ</h1><span id="weekLabel"></span></div>
+    <div class="brand"><h1>細マッチョ</h1><div class="weeknav"><button type="button" id="wkPrev" aria-label="Previous week">‹</button><span id="weekLabel"></span><button type="button" id="wkNext" aria-label="Next week">›</button><button type="button" class="now" id="wkNow" hidden>This week</button></div></div>
     <div class="seg" role="tablist" aria-label="Section">
       <button role="tab" id="tab-gym" aria-controls="gym" aria-selected="true" data-tab="gym">Gym</button>
       <button role="tab" id="tab-food" aria-controls="food" aria-selected="false" data-tab="food">Food</button>
@@ -372,12 +377,12 @@ const EX = {
     cue: "Rope on the low pulley, thumbs up. Elbows pinned to your sides, curl, then lower for a 2-second count." },
   wristExt:    { name: "Dumbbell wrist extension", img: "wrist-ext", yt: "N284Q08Ne2g", short: true,
     cue: "Forearm on your thigh or a bench, palm down, wrist past the edge. Lift the back of the hand up, lower slowly. Light weight, full range." },
-  boxSquat:    { name: "Barbell box squat", img: "box-squat", yt: "1SgHKc5tImQ",
-    cue: "Bar on upper back in a rack with safety pins set. Sit back onto a box at or a little above knee height, touch it lightly without relaxing, stand up. The box caps depth, which keeps knee load down. Raise the box if your knees ache." },
+  legPress:    { name: "Leg press", img: "leg-press", yt: "26DciWnfbRg", short: true,
+    cue: "Feet high and shoulder-width on the platform so the knees bend less. Lower only until the knees reach about 90° (shallower if they ache), back flat on the pad, don't lock out the knees. Stop a set if the knees hurt." },
   legCurl:     { name: "Seated leg curl", img: "seated-leg-curl", yt: "7PE3MlvGAts", short: true,
     cue: "Line the machine pivot up with your knee. Smooth curl, slow return." },
-  bbRdl:       { name: "Barbell Romanian deadlift", img: "bb-rdl", yt: "lDoRchHPsaI", short: true,
-    cue: "Bar starts at the hips. Soft knees, push hips back, bar slides down your thighs. Stop when the hamstrings are tight (around the knees for most people), not as low as possible. Back stays flat." },
+  bbDeadlift:  { name: "Barbell deadlift", img: "bb-deadlift", yt: "xNwpvDuZJ3k", short: true,
+    cue: "Bar over mid-foot, shins close to the bar. Hinge down, grip just outside the legs, chest up, back flat. Push the floor away and keep the bar dragging up your legs. Start light and stop a set when your back rounds." },
   legExt:      { name: "Leg extension", img: "leg-extension", yt: "Tae3aeJe5Ks", short: true,
     cue: "Knee lined up with the machine pivot. Squeeze at the top for 1 s, lower slowly. Weak knees: lighter weight, slow reps, and only the range that feels fine." },
   calfPress:   { name: "Calf raise on the leg press", img: "calf-press", yt: "DqT1h2_hQJ4", short: true,
@@ -408,21 +413,25 @@ const COOLDOWN = [
 ];
 const PUSH = [["chestPress", 3, "8–12"], ["cableFly", 2, "12–15 / side"], ["lateral", 3, "12–15 / side"], ["overhead", 3, "10–15"], ["abMachine", 3, "10–15"]];
 const PULL = core => [["latRow", 3, "10–12 / side"], ["pulldown", 3, "8–12"], ["facePull", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["wristExt", 2, "15–20"], ["hang", 2, "20–30 s"], core];
-/* Weekdays carry the rest days; the weekend has more time for the gym. */
-const DAYS = [
-  { key: "mon", short: "Mon", name: "Monday",    title: "Rest", sub: "Rest", time: "full rest", ex: [] },
-  { key: "tue", short: "Tue", name: "Tuesday",   title: "Pull A", sub: "Pull", time: "50–60 min", ex: PULL(["deadBug", 2, "8–10 / side"]) },
-  { key: "wed", short: "Wed", name: "Wednesday", title: "Legs", sub: "Legs", time: "45–55 min",
-    ex: [["boxSquat", 3, "6–10"], ["bbRdl", 3, "8–10"], ["legCurl", 3, "10–15"], ["legExt", 2, "12–15"], ["calfPress", 3, "12–20"]] },
-  { key: "thu", short: "Thu", name: "Thursday",  title: "Push A + abs", sub: "Push", time: "50–60 min", ex: PUSH },
-  { key: "fri", short: "Fri", name: "Friday",    title: "Rest", sub: "Rest", time: "full rest", ex: [] },
-  { key: "sat", short: "Sat", name: "Saturday",  title: "Pull B", sub: "Pull", time: "50–60 min", ex: PULL(["pallof", 2, "10 / side"]) },
-  { key: "sun", short: "Sun", name: "Sunday",    title: "Push B + abs", sub: "Push", time: "50–60 min", ex: PUSH }
-];
-const REST_TEXT = {
-  mon: ["Full rest after two weekend sessions. A 20–30 min walk is fine.", "Do the after-session stretches if you feel stiff.", "Eat the full menu and hit your protein."],
-  fri: ["Rest before the weekend sessions. A relaxed walk is fine.", "Check you have food for the weekend; batch prep is Sunday after the gym.", "Missed a session this week? Let it go and pick up with the next one."]
+const SESSIONS = {
+  rest:  { title: "Rest",         sub: "Rest", time: "full rest", ex: [] },
+  pullA: { title: "Pull A",       sub: "Pull", time: "50–60 min", ex: PULL(["deadBug", 2, "8–10 / side"]) },
+  pullB: { title: "Pull B",       sub: "Pull", time: "50–60 min", ex: PULL(["pallof", 2, "10 / side"]) },
+  push:  { title: "Push + abs",   sub: "Push", time: "50–60 min", ex: PUSH },
+  legs:  { title: "Legs",         sub: "Legs", time: "45–55 min",
+    ex: [["legPress", 3, "8–12"], ["bbDeadlift", 3, "5–8"], ["legCurl", 3, "10–15"], ["legExt", 2, "12–15"], ["calfPress", 3, "12–20"]] }
 };
+/* Default week; any date can be switched to another session (hist.plan[date]). Weekdays carry the rest days. */
+const DAYS = [
+  { key: "mon", short: "Mon", name: "Monday",    def: "rest" },
+  { key: "tue", short: "Tue", name: "Tuesday",   def: "pullA" },
+  { key: "wed", short: "Wed", name: "Wednesday", def: "legs" },
+  { key: "thu", short: "Thu", name: "Thursday",  def: "push" },
+  { key: "fri", short: "Fri", name: "Friday",    def: "rest" },
+  { key: "sat", short: "Sat", name: "Saturday",  def: "pullB" },
+  { key: "sun", short: "Sun", name: "Sunday",    def: "push" }
+];
+const REST_TEXT = ["Full rest. A 20–30 min walk is fine.", "Do the after-session stretches if you feel stiff.", "Eat the full menu and hit your protein.", "Missed a session this week? Let it go and pick up with the next one."];
 
 const MEALS = {
   eggs:    { name: "Eggs on rice", img: "eggs", time: "8 min", p: 16,
@@ -556,9 +565,9 @@ const EVIDENCE = [
     d: "Machine chest press 3 sets + single-arm cable fly 2 sets, twice a week = 10 chest sets. No bench needed.",
     src: [["Haugen et al., BMC Sports Sci Med Rehabil 2023", "https://pmc.ncbi.nlm.nih.gov/articles/PMC10426227/"]] },
   { t: "Weak knees",
-    e: "Knee joint forces rise as the knee bends and peak near the deepest point of a squat. Squats load the knee more than the leg press at the same depth.",
-    r: "Swapping machines doesn't fix sore knees; controlling depth does. Hip-hinge moves (RDL, leg curl) load the knee very little.",
-    d: "Box squat to a box at or above knee height, barbell RDL for the back of the legs, calf raises with straight knees. If knees still hurt, see a physio.",
+    e: "Knee joint forces rise as the knee bends and peak near the deepest point of a squat. Squats load the knee more than the leg press at the same depth, so the leg press at a limited depth is a fair choice.",
+    r: "Swapping machines doesn't fix sore knees; controlling depth does. Hip-hinge moves (deadlift, leg curl) load the knee very little.",
+    d: "Leg press with feet high and depth capped near 90°, barbell deadlift for the back of the legs, calf raises with straight knees. If knees still hurt, see a physio.",
     src: [["Escamilla 2001, Med Sci Sports Exerc", "https://pubmed.ncbi.nlm.nih.gov/11194098/"]] },
   { t: "Abs",
     e: "In a 6-week trial, people doing ab exercises 5 days a week lost no more belly fat than a group that didn't. Spot reduction doesn't work.",
@@ -595,8 +604,8 @@ const FOOD_CREDITS = [
 ];
 
 /* ---------- state ---------- */
-/* v4: exercise order changed again, so older set ticks no longer line up. */
-const STORE_KEY = "hosomacho_v5";
+/* v6: ticks are keyed by date (not weekday) so past weeks stay editable. Bump when exercise order changes. */
+const STORE_KEY = "hosomacho_v6";
 const GROC_KEY = "hosomacho_grocery_v2";
 /* Never reset: sets[date] = sets ticked that day (heatmap); lifts[exId] = [{d, w, r}] one entry per date. */
 const HIST_KEY = "hosomacho_history_v1";
@@ -607,15 +616,16 @@ function mondayOf(d) {
 }
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const thisMonday = mondayOf(new Date());
-const weekId = ymd(thisMonday);
+let weekOffset = 0;
+const viewMonday = () => { const d = new Date(thisMonday); d.setDate(d.getDate() + weekOffset * 7); return d; };
 function load(key, fallback) {
   try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; }
 }
 function save(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch {} }
 let state = load(STORE_KEY, null);
-if (!state || state.week !== weekId) state = { week: weekId, gym: {}, food: {}, tab: state?.tab || "gym" };
+if (!state) state = { gym: {}, food: {}, tab: load("hosomacho_v5", null)?.tab || "gym" };
 let hist = load(HIST_KEY, {});
-hist.sets ||= {}; hist.lifts ||= {};
+hist.sets ||= {}; hist.lifts ||= {}; hist.plan ||= {};
 /* Sessions trained before the history log existed. */
 const PAST_SESSIONS = { "2026-10-27": 20 };
 for (const [d, n] of Object.entries(PAST_SESSIONS)) hist.sets[d] ??= n;
@@ -624,10 +634,14 @@ let groc = load(GROC_KEY, {});
 const todayKey = DAYS[(new Date().getDay() + 6) % 7].key;
 let day = todayKey;
 function dateOf(key) {
-  const d = new Date(thisMonday);
+  const d = viewMonday();
   d.setDate(d.getDate() + DAYS.findIndex(x => x.key === key));
   return ymd(d);
 }
+
+const isToday = key => weekOffset === 0 && key === todayKey;
+const sessionOf = key => hist.plan[dateOf(key)] || DAYS.find(x => x.key === key).def;
+const dayInfo = key => ({ ...DAYS.find(x => x.key === key), ...SESSIONS[sessionOf(key)] });
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -642,18 +656,23 @@ function imgFail(img, text) {
 /* ---------- header ---------- */
 function renderDays() {
   const fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
-  const end = new Date(thisMonday); end.setDate(end.getDate() + 6);
-  $("#weekLabel").textContent = `Week of ${fmt.format(thisMonday)} – ${fmt.format(end)}`;
-  $("#days").innerHTML = DAYS.map(d => `
-    <button type="button" data-day="${d.key}" aria-pressed="${d.key === day}" class="${d.key === todayKey ? "today" : ""}"
-      aria-label="${d.name}: ${d.title}${d.key === todayKey ? " (today)" : ""}">
+  const mon = viewMonday(), end = new Date(mon); end.setDate(end.getDate() + 6);
+  $("#weekLabel").textContent = `${fmt.format(mon)} – ${fmt.format(end)}`;
+  $("#wkNow").hidden = weekOffset === 0;
+  $("#days").innerHTML = DAYS.map(x => { const d = dayInfo(x.key); return `
+    <button type="button" data-day="${d.key}" aria-pressed="${d.key === day}" class="${isToday(d.key) ? "today" : ""}"
+      aria-label="${d.name}: ${d.title}${isToday(d.key) ? " (today)" : ""}">
       <b>${d.short}</b><small>${d.sub}</small>
-    </button>`).join("");
+    </button>`; }).join("");
 }
+function renderAll() { renderDays(); renderGym(); renderFood(); }
 $("#days").addEventListener("click", e => {
   const b = e.target.closest("[data-day]"); if (!b) return;
-  day = b.dataset.day; renderDays(); renderGym(); renderFood();
+  day = b.dataset.day; renderAll();
 });
+$("#wkPrev").addEventListener("click", () => { weekOffset--; renderAll(); });
+$("#wkNext").addEventListener("click", () => { weekOffset++; renderAll(); });
+$("#wkNow").addEventListener("click", () => { weekOffset = 0; day = todayKey; renderAll(); });
 document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
 function setTab(t) {
   state.tab = t; save(STORE_KEY, state);
@@ -664,28 +683,29 @@ function setTab(t) {
 /* ---------- gym ---------- */
 function renderGym() {
   renderGymHead();
-  const d = DAYS.find(x => x.key === day);
-  const done = state.gym[day] || {};
+  const d = dayInfo(day);
+  const done = state.gym[dateOf(day)] || {};
   if (!d.ex.length) {
     $("#gymList").innerHTML = `<div class="ex"><div class="body"><h3>Rest day</h3>
-      <ul class="clean">${REST_TEXT[d.key].map(t => `<li>${t}</li>`).join("")}</ul></div></div>`;
+      <ul class="clean">${REST_TEXT.map(t => `<li>${t}</li>`).join("")}</ul></div></div>`;
     return;
   }
   renderGymList(d, done);
 }
 function renderGymHead() {
-  const d = DAYS.find(x => x.key === day);
-  const done = state.gym[day] || {};
+  const d = dayInfo(day);
+  const done = state.gym[dateOf(day)] || {};
   /* Optional lifts don't count toward the day's total, so skipping them still completes the day. */
   const req = d.ex.map((e, i) => [e, i]).filter(([[id]]) => !EX[id].optional);
   const total = req.reduce((n, [[, s]]) => n + s, 0);
   const count = req.reduce((n, [[, s], i]) => n + Array.from({ length: s }, (_, k) => done[`${i}.${k}`]).filter(Boolean).length, 0);
   const pct = total ? Math.round(count / total * 100) : 0;
   $("#gymHead").innerHTML = `
-    <span class="label">${d.name}${d.key === todayKey ? " · today" : ""}</span>
+    <span class="label">${d.name}, ${fmtShort.format(parseYmd(dateOf(day)))}${isToday(d.key) ? " · today" : ""}</span>
     <h2>${esc(d.title)}</h2>
     <div class="row">
       <span class="chip">${d.time}</span>
+      <select class="sess" id="sessPick" aria-label="Session for this day">${Object.entries(SESSIONS).map(([k, v]) => `<option value="${k}"${k === sessionOf(day) ? " selected" : ""}>${v.title}</option>`).join("")}</select>
       ${total ? `<span class="chip ${count === total ? "done" : ""}" id="gymCount"><span class="mono">${count}/${total}</span> sets done</span>` : ""}
     </div>
     ${total ? `<div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div>` : ""}`;
@@ -716,10 +736,20 @@ function renderGymList(d, done) {
   }).join("");
   $("#gymList").querySelectorAll("[data-reel]").forEach(m => { imgFail(m.querySelector("img"), EX[m.dataset.reel].name); reelObserver.observe(m); });
 }
+$("#gymHead").addEventListener("change", e => {
+  if (e.target.id !== "sessPick") return;
+  const k = e.target.value, date = dateOf(day);
+  if (k === sessionOf(day)) return;
+  if (hist.sets[date] && !confirm("Changing the session clears the sets ticked on this day. Continue?")) { renderGymHead(); return; }
+  delete state.gym[date]; delete hist.sets[date];
+  if (k === DAYS.find(x => x.key === day).def) delete hist.plan[date]; else hist.plan[date] = k;
+  save(STORE_KEY, state); save(HIST_KEY, hist);
+  renderAll(); renderHeat();
+});
 $("#gymList").addEventListener("click", e => {
   const s = e.target.closest("[data-set]");
   if (s) {
-    const m = (state.gym[day] ||= {});
+    const m = (state.gym[dateOf(day)] ||= {});
     m[s.dataset.set] = !m[s.dataset.set];
     save(STORE_KEY, state);
     s.setAttribute("aria-pressed", m[s.dataset.set]);
@@ -825,9 +855,10 @@ $("#bkRestore").addEventListener("click", () => {
     for (const e of log) byDate[e.d] = e;
     hist.lifts[id] = Object.values(byDate).sort((a, b) => a.d < b.d ? -1 : 1);
   }
+  Object.assign(hist.plan, data.hist.plan || {});
   Object.assign(groc, data.groc || {});
   save(HIST_KEY, hist); save(GROC_KEY, groc);
-  renderHeat(); renderGym(); renderGroc();
+  renderHeat(); renderAll(); renderGroc();
   $("#bkIn").value = "";
   bkSay(`Restored ${Object.keys(data.hist.sets).length} workout days.`);
 });
@@ -872,14 +903,14 @@ $("#gymList").addEventListener("click", e => {
 
 /* ---------- food ---------- */
 function renderFood() {
-  const d = DAYS.find(x => x.key === day);
+  const d = dayInfo(day);
   const menu = MENU[day];
-  const eaten = state.food[day] || {};
+  const eaten = state.food[dateOf(day)] || {};
   const protein = menu.reduce((n, [, id]) => n + MEALS[id].p, 0);
   const count = menu.filter((_, i) => eaten[i]).length;
   const got = menu.reduce((n, [, id], i) => n + (eaten[i] ? MEALS[id].p : 0), 0);
   $("#foodHead").innerHTML = `
-    <span class="label">${d.name}${d.key === todayKey ? " · today" : ""} · ${esc(d.title)} day</span>
+    <span class="label">${d.name}${isToday(d.key) ? " · today" : ""} · ${esc(d.title)} day</span>
     <h2>What you eat today</h2>
     <div class="row">
       <span class="chip accent">Plan: ~<span class="mono">${protein}</span> g protein</span>
@@ -923,7 +954,7 @@ function renderFood() {
 }
 $("#mealList").addEventListener("click", e => {
   const b = e.target.closest("[data-eat]"); if (!b) return;
-  const m = (state.food[day] ||= {});
+  const m = (state.food[dateOf(day)] ||= {});
   m[b.dataset.eat] = !m[b.dataset.eat];
   save(STORE_KEY, state);
   const open = [...$("#mealList").querySelectorAll("details")].map(x => x.open);
@@ -985,7 +1016,7 @@ $("#evidence").innerHTML = EVIDENCE.map(x => `
     <p class="small">${x.src.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(n)} ↗</a>`).join(" · ")}</p>
   </div>`).join("");
 $("#credits").innerHTML = `
-  <p>Checkmarks save in this browser only and reset each Monday. Grocery checks stay until you clear them.</p>
+  <p>Checkmarks and session changes save in this browser only. Use the arrows at the top to visit other weeks. Grocery checks stay until you clear them.</p>
   <p>Demo videos are embedded from YouTube and belong to their creators. Exercise and stretch photos: <a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener">free-exercise-db</a> (public domain).
   Food photos via Wikimedia Commons: ${FOOD_CREDITS.map(([n, a, l, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(n)}</a> by ${esc(a)}, ${l}`).join("; ")}.</p>
   <p>Training and nutrition guide only. Not medical advice.</p>`;
