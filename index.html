@@ -361,8 +361,8 @@ const EX = {
     cue: "Pulley at chest height, slight elbow bend. Sweep the handle across to the middle of your chest. Stop when your hand is in line with your body; no deep stretch behind it.", sh: true },
   lateral:     { name: "Cable lateral raise", img: "cable-lateral", yt: "f_OGBg2KxgY", short: true,
     cue: "Low pulley, cable crossing in front of you. Very light. Raise slightly forward of your side, no higher than shoulder height.", sh: true },
-  overhead:    { name: "Cable overhead triceps extension", img: "overhead-triceps", yt: "jsQnhVg47rA", short: true,
-    cue: "Rope on the low pulley. Face away, step forward, rope behind your head, elbows by your ears and pointing forward. Straighten the arms overhead, lower slowly. If the shoulder pinches, lean further forward.", sh: true },
+  crossTri:    { name: "Standing cross-body cable triceps extension", img: "cross-triceps", yt: "qQT6BBNat2s", short: true,
+    cue: "High pulley with a single handle. Stand side-on, elbow tucked to your ribs, hand across your body. Straighten the arm down and across, hold 1 s, return slowly. Only the forearm moves; no shrugging or leaning." },
   abMachine:   { name: "Seated ab crunch machine", img: "ab-machine", yt: "mnRhbUB3Fjs", short: true,
     cue: "Seated, so no weight on your knees. Curl your ribs down toward your hips, pause, return slowly. Don't yank with the arms. No machine: lying crunch with a plate on your chest." },
   latRow:      { name: "Standing single-arm cable lat row", img: "cable-row-standing", yt: "pBbbR6ypIEs",
@@ -411,7 +411,7 @@ const COOLDOWN = [
   ["hamstring-calf", "Hamstring + calf stretch", "2 × 20–30 s / side", "Leg straight, toes up, hinge forward with a flat back."],
   ["hip-flexor", "Half-kneeling hip-flexor stretch", "2 × 20–30 s / side", "Squeeze the back glute and shift forward until the front of the hip stretches."]
 ];
-const PUSH = [["chestPress", 3, "8–12"], ["cableFly", 2, "12–15 / side"], ["lateral", 3, "12–15 / side"], ["overhead", 3, "10–15"], ["abMachine", 3, "10–15"]];
+const PUSH = [["chestPress", 3, "8–12"], ["cableFly", 2, "12–15 / side"], ["lateral", 3, "12–15 / side"], ["crossTri", 3, "10–15 / side"], ["abMachine", 3, "10–15"]];
 const PULL = core => [["latRow", 3, "10–12 / side"], ["pulldown", 3, "8–12"], ["facePull", 2, "12–15"], ["curl", 3, "10–15"], ["hammer", 2, "10–15"], ["wristExt", 2, "15–20"], ["hang", 2, "20–30 s"], core];
 const SESSIONS = {
   rest:  { title: "Rest",         sub: "Rest", time: "full rest", ex: [] },
